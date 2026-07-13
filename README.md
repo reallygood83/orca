@@ -10,12 +10,21 @@
 
 | 역할 | 할 일 |
 |------|--------|
-| **당신 (운영자)** | 이 레포 `main`이 Vercel에 연결돼 있으면 끝. 사람들에게 **https://orca-lime.vercel.app** 링크만 공유 |
-| **사용자** | 사이트에서 모드 만들기 → 파일 저장 → Orca Quick Command 등록 |
-| **설정 저장 위치** | **사용자 PC** (`~/.orca/...`). 서버/Vercel에는 저장 안 됨 |
+| **당신 (운영자)** | **https://orca-lime.vercel.app** 링크 공유 |
+| **사용자 · 웹** | 탭 3–4로 모드 만들고 Quick Command 등록 |
+| **사용자 · 스킬** | 터미널 한 줄로 `orca-mode-pack` 설치 (아래) |
+| **설정 저장** | **사용자 PC** only. 서버에 안 쌓임 |
 
-네 — **지금처럼 Vercel 사이트에서 작업하는 구조**가 맞습니다.  
-사이트 = 설계 도구, 실제 조율 실행 = 각자 Orca 앱.
+### 사용자 원클릭 (스킬)
+
+```bash
+curl -fsSL https://orca-lime.vercel.app/install.sh | bash
+```
+
+→ `~/.agents/skills/orca-mode-pack/` + `generate-pack.sh`  
+→ 에이전트: `/orchestration-mode`
+
+네 — **Vercel 사이트 + 같은 도메인의 install.sh** 로 배포합니다.
 
 ## 사용자 흐름 (사이트)
 

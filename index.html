@@ -227,23 +227,39 @@
         <span class="pill hi">공개 주소 · https://orca-lime.vercel.app</span>
         <button class="btn secondary" type="button" id="btnCopySite" style="padding:8px 12px;font-size:13px">사이트 링크 복사</button>
         <button class="btn secondary" type="button" id="btnCopyShare" style="padding:8px 12px;font-size:13px">공유 문구 복사</button>
+        <button class="btn" type="button" id="btnGoSkill" style="padding:8px 12px;font-size:13px">스킬 원클릭 설치 →</button>
       </div>
     </header>
 
-    <div class="card" style="margin-top:16px;border-color:rgba(94,234,212,.35)">
+    <div class="card" style="margin-top:16px;border-color:rgba(124,156,255,.45);background:rgba(124,156,255,.08)">
+      <h2 style="margin-top:0">Mac/Linux · 터미널 한 줄로 스킬 설치</h2>
+      <p style="margin:0 0 10px;color:var(--muted)">
+        <strong style="color:var(--text)">orca-mode-pack</strong> 을 자기 PC에 깔면,
+        에이전트에게 <code class="inline">/orchestration-mode</code> · <code class="inline">조율 모드 만들기</code> 라고 말할 수 있습니다.
+        (웹 모드 만들기와 별개 · 둘 다 사용 가능)
+      </p>
+      <pre class="box" id="oneLinerInstall" style="margin:0">curl -fsSL https://orca-lime.vercel.app/install.sh | bash</pre>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" type="button" id="btnCopyInstall">설치 명령 복사</button>
+        <button class="btn secondary" type="button" id="btnCopyInstallEngine">엔진 포함 안내 복사</button>
+        <a class="link-btn" href="https://orca-lime.vercel.app/install.sh" target="_blank" rel="noopener" style="text-decoration:none">install.sh 열기</a>
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--muted)">
+        Windows: WSL 또는 Git Bash에서 같은 명령 · 상세는 탭 <strong>5. 스킬 원클릭 설치</strong>
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:14px;border-color:rgba(94,234,212,.35)">
       <h2 style="margin-top:0">이 사이트를 사람들에게 배포하려면?</h2>
       <p style="margin:0 0 8px">
         <strong>링크만 공유하면 됩니다.</strong>
         설정은 서버에 저장되지 않고, 각자 브라우저에서 만든 뒤 <strong>자기 PC(Orca)</strong>에 설치합니다.
       </p>
       <ol class="checklist" style="margin:0">
-        <li><span class="stepnum">1</span><div><strong>공유:</strong> <code class="inline">https://orca-lime.vercel.app</code> (유튜브 설명·오픈채팅·뉴스레터)</div></li>
-        <li><span class="stepnum">2</span><div><strong>사용자:</strong> 탭 3에서 모드 만들기 → 탭 4 설치 (Quick Command 등록까지)</div></li>
-        <li><span class="stepnum">3</span><div><strong>당신(운영):</strong> GitHub <code class="inline">main</code> 수정 시 Vercel이 자동 재배포</div></li>
+        <li><span class="stepnum">1</span><div><strong>공유:</strong> <code class="inline">https://orca-lime.vercel.app</code></div></li>
+        <li><span class="stepnum">2</span><div><strong>웹으로 모드:</strong> 탭 3 → 탭 4 (Quick Command)</div></li>
+        <li><span class="stepnum">3</span><div><strong>AI 스킬까지:</strong> 탭 5 한 줄 설치 (orca-mode-pack)</div></li>
       </ol>
-      <p style="margin:10px 0 0;font-size:13px;color:var(--muted)">
-        상세 가이드: GitHub 저장소의 <code class="inline">사용방법.md</code>
-      </p>
     </div>
 
     <!-- 현재 모드 요약: 모든 탭 공통, 변수 연동 -->
@@ -260,7 +276,8 @@
       <button class="tab active" data-tab="concept" type="button">1. 이게 뭐야?</button>
       <button class="tab" data-tab="flow" type="button">2. 어떻게 돌아가?</button>
       <button class="tab" data-tab="wizard" type="button">3. 내 모드 만들기</button>
-      <button class="tab" data-tab="install" type="button">4. 설치 방법</button>
+      <button class="tab" data-tab="install" type="button">4. 모드 설치</button>
+      <button class="tab" data-tab="skill" type="button">5. 스킬 원클릭 설치</button>
     </nav>
 
     <!-- 1 -->
@@ -503,6 +520,87 @@
         <textarea id="outQuick" readonly></textarea>
         <div class="preview-title">규칙 파일 (PLAYBOOK.md) — 지금 설정 반영</div>
         <textarea id="outPlaybook" readonly style="min-height:220px"></textarea>
+      </div>
+    </section>
+
+    <!-- 5: skill install -->
+    <section id="panel-skill" class="panel">
+      <div class="card">
+        <h2>orca-mode-pack 이란?</h2>
+        <p>
+          코딩 에이전트(Grok / Claude / Codex 등)가 읽는 <strong>조율 모드 생성·실행 매뉴얼</strong>입니다.
+          웹 스튜디오(탭 3–4)와 <strong>같은 목표</strong>를, 채팅 명령으로도 할 수 있게 해 줍니다.
+        </p>
+        <div class="compare" style="margin-top:12px">
+          <div class="box ok">
+            <div class="title">웹 (탭 3–4)</div>
+            <p style="margin:0">클릭으로 모드 설계 · .md 다운로드 · Quick Command</p>
+          </div>
+          <div class="box ok">
+            <div class="title">스킬 (이 탭)</div>
+            <p style="margin:0">터미널 한 줄 설치 → 에이전트에 <code class="inline">/orchestration-mode</code></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(124,156,255,.5)">
+        <h2>1단계 · 터미널에 붙여넣기 (Mac / Linux / WSL)</h2>
+        <pre class="box" id="skillOneLiner">curl -fsSL https://orca-lime.vercel.app/install.sh | bash</pre>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" type="button" id="btnCopySkillOne">한 줄 설치 복사</button>
+        </div>
+        <p style="margin:12px 0 0;color:var(--muted);font-size:14px">
+          설치 위치: <code class="inline">~/.agents/skills/orca-mode-pack/</code><br/>
+          생성기: <code class="inline">~/.orca/studio/generate-pack.sh</code>
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>2단계 · 엔진 스킬 (PC당 1회, 권장)</h2>
+        <p style="margin-top:0;color:var(--muted)">실제 Orca task/dispatch 를 돌리려면 엔진 스킬이 필요합니다.</p>
+        <pre class="box" id="skillEngine">npx skills add https://github.com/stablyai/orca --skill orchestration
+npx skills add https://github.com/stablyai/orca --skill orca-cli</pre>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn secondary" type="button" id="btnCopySkillEngine">엔진 명령 복사</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3단계 · Orca 설정</h2>
+        <ol class="checklist">
+          <li><span class="stepnum">1</span><div>Orca → <strong>Settings → Experimental → Orchestration</strong> 켜기</div></li>
+          <li><span class="stepnum">2</span><div>에이전트 탭에서 말하기:<br/>
+            <code class="inline">/orchestration-mode</code> 또는 <code class="inline">조율 모드 만들기</code></div></li>
+          <li><span class="stepnum">3</span><div>팀장·실무 모델 알려 주면 팩 생성 → Quick Command 등록 안내</div></li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>운영자 · 사람들에게 이렇게 공유</h2>
+        <pre class="box" id="skillShareBlurb">[Orca 조율] 웹 + 스킬 설치
+
+웹에서 모드 만들기:
+https://orca-lime.vercel.app
+
+AI 스킬 한 줄 설치 (Mac/Linux 터미널):
+curl -fsSL https://orca-lime.vercel.app/install.sh | bash
+
+그다음 에이전트에게:
+/orchestration-mode
+또는 "조율 모드 만들기"</pre>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn secondary" type="button" id="btnCopySkillShare">공유 문구 복사</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>설치 확인</h2>
+        <pre class="box">ls ~/.agents/skills/orca-mode-pack/SKILL.md
+ls ~/.orca/studio/generate-pack.sh
+cat ~/.orca/MODE-PACK-INSTALLED.md</pre>
+        <p style="margin:10px 0 0;color:var(--muted);font-size:14px">
+          파일이 보이면 성공입니다. 에이전트를 <strong>새 세션</strong>으로 열면 스킬이 더 잘 잡힙니다.
+        </p>
       </div>
     </section>
 
@@ -1066,18 +1164,43 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
 
     const SITE_URL = "https://orca-lime.vercel.app";
+    const INSTALL_ONE = `curl -fsSL ${SITE_URL}/install.sh | bash`;
     const SHARE_BLURB =
 `Orca 조율 모드 만들기 (무료)
 ${SITE_URL}
 
-1) 사이트 접속
-2) 탭 3에서 팀장·실무 모델 고르기
-3) 탭 4 설치 방법 → 자기 PC에 저장 + Orca Quick Command 등록
+[웹] 탭 3에서 모드 만들기 → 탭 4 설치
+[스킬] 터미널 한 줄:
+${INSTALL_ONE}
 
-※ 각자 자기 컴퓨터에 설치합니다. 제작자 PC 설정 불필요.`;
+그다음 에이전트에게: /orchestration-mode  또는  조율 모드 만들기
+
+※ 각자 자기 컴퓨터에 설치. 제작자 PC 설정 불필요.`;
 
     if ($("btnCopySite")) $("btnCopySite").onclick = () => copyText(SITE_URL);
     if ($("btnCopyShare")) $("btnCopyShare").onclick = () => copyText(SHARE_BLURB);
+    if ($("btnCopyInstall")) $("btnCopyInstall").onclick = () => copyText(INSTALL_ONE);
+    if ($("btnCopySkillOne")) $("btnCopySkillOne").onclick = () => copyText(INSTALL_ONE);
+    if ($("btnCopySkillEngine")) $("btnCopySkillEngine").onclick = () =>
+      copyText($("skillEngine").textContent);
+    if ($("btnCopySkillShare")) $("btnCopySkillShare").onclick = () =>
+      copyText($("skillShareBlurb").textContent);
+    if ($("btnCopyInstallEngine")) $("btnCopyInstallEngine").onclick = () =>
+      copyText(
+        INSTALL_ONE +
+          "\n\n# 엔진 (PC당 1회)\nnpx skills add https://github.com/stablyai/orca --skill orchestration\nnpx skills add https://github.com/stablyai/orca --skill orca-cli\n"
+      );
+    if ($("btnGoSkill")) {
+      $("btnGoSkill").onclick = () => {
+        document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        const tab = document.querySelector('.tab[data-tab="skill"]');
+        if (tab) tab.classList.add("active");
+        const panel = $("panel-skill");
+        if (panel) panel.classList.add("active");
+        panel && panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+    }
 
     $("btnDownload").onclick = () => {
       const v = vals();
