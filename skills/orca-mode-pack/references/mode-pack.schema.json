@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reallygood83.github.io/orca/mode-pack.schema.json",
+  "title": "OrcaModePack",
+  "type": "object",
+  "required": ["modeName", "displayName", "coordination", "coordinator", "workers", "worktreePolicy"],
+  "properties": {
+    "modeName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Install dir name under $HOME/.orca/"
+    },
+    "displayName": { "type": "string", "minLength": 1 },
+    "triggers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["orchestrate"]
+    },
+    "coordination": {
+      "type": "string",
+      "enum": ["supervised", "handoff"],
+      "default": "supervised"
+    },
+    "coordinator": {
+      "type": "object",
+      "required": ["agent"],
+      "properties": {
+        "agent": { "type": "string", "enum": ["grok", "claude", "codex", "opencode", "custom"] },
+        "command": { "type": "string", "description": "Optional; empty = current session" }
+      }
+    },
+    "workers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "agent", "command"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["implement", "review", "test", "research", "docs", "custom"]
+          },
+          "agent": { "type": "string" },
+          "model": { "type": "string" },
+          "effort": { "type": "string" },
+          "command": {
+            "type": "string",
+            "description": "Full shell command for orca terminal create --command"
+          },
+          "ownership": {
+            "type": "string",
+            "enum": ["edit", "review-only"],
+            "default": "edit"
+          }
+        }
+      }
+    },
+    "worktreePolicy": {
+      "type": "string",
+      "enum": ["active", "isolated", "auto"],
+      "default": "auto"
+    },
+    "maxConcurrent": { "type": "integer", "minimum": 1, "maximum": 6, "default": 3 },
+    "waitTimeoutMs": { "type": "integer", "minimum": 60000, "default": 900000 },
+    "finalSections": { "type": "string" },
+    "projectRules": { "type": "string" }
+  }
+}
