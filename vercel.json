@@ -11,17 +11,24 @@
       ]
     },
     {
-      "source": "/install.sh",
+      "source": "/setup-mode-pack.sh",
       "headers": [
-        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Content-Type", "value": "text/x-shellscript; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=60" }
       ]
     },
     {
-      "source": "/pack/(.*)",
+      "source": "/generate-pack.sh",
       "headers": [
-        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        { "key": "Content-Type", "value": "text/x-shellscript; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=60" }
+      ]
+    },
+    {
+      "source": "/skills/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=60" }
       ]
     }
   ]

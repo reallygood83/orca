@@ -18,13 +18,13 @@
 ### 사용자 원클릭 (스킬)
 
 ```bash
-curl -fsSL https://orca-lime.vercel.app/install.sh | bash
+curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
 ```
 
 → `~/.agents/skills/orca-mode-pack/` + `generate-pack.sh`  
 → 에이전트: `/orchestration-mode`
 
-네 — **Vercel 사이트 + 같은 도메인의 install.sh** 로 배포합니다.
+네 — **Vercel 사이트 + 같은 도메인의 setup-mode-pack.sh** 로 배포합니다.
 
 ## 사용자 흐름 (사이트)
 

@@ -238,11 +238,11 @@
         에이전트에게 <code class="inline">/orchestration-mode</code> · <code class="inline">조율 모드 만들기</code> 라고 말할 수 있습니다.
         (웹 모드 만들기와 별개 · 둘 다 사용 가능)
       </p>
-      <pre class="box" id="oneLinerInstall" style="margin:0">curl -fsSL https://orca-lime.vercel.app/install.sh | bash</pre>
+      <pre class="box" id="oneLinerInstall" style="margin:0">curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash</pre>
       <div class="actions" style="margin-top:12px">
         <button class="btn" type="button" id="btnCopyInstall">설치 명령 복사</button>
         <button class="btn secondary" type="button" id="btnCopyInstallEngine">엔진 포함 안내 복사</button>
-        <a class="link-btn" href="https://orca-lime.vercel.app/install.sh" target="_blank" rel="noopener" style="text-decoration:none">install.sh 열기</a>
+        <a class="link-btn" href="https://orca-lime.vercel.app/setup-mode-pack.sh" target="_blank" rel="noopener" style="text-decoration:none">setup-mode-pack.sh 열기</a>
       </div>
       <p style="margin:12px 0 0;font-size:13px;color:var(--muted)">
         Windows: WSL 또는 Git Bash에서 같은 명령 · 상세는 탭 <strong>5. 스킬 원클릭 설치</strong>
@@ -545,10 +545,15 @@
 
       <div class="card" style="border-color:rgba(124,156,255,.5)">
         <h2>1단계 · 터미널에 붙여넣기 (Mac / Linux / WSL)</h2>
-        <pre class="box" id="skillOneLiner">curl -fsSL https://orca-lime.vercel.app/install.sh | bash</pre>
+        <pre class="box" id="skillOneLiner">curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash</pre>
         <div class="actions" style="margin-top:12px">
           <button class="btn" type="button" id="btnCopySkillOne">한 줄 설치 복사</button>
+          <button class="btn secondary" type="button" id="btnDlSkillMd">SKILL.md 다운로드</button>
+          <button class="btn secondary" type="button" id="btnDlRequest">REQUEST 템플릿 다운로드</button>
         </div>
+        <p style="margin:10px 0 0;color:var(--muted);font-size:13px">
+          터미널이 없으면 파일을 받아 <code class="inline">~/.agents/skills/orca-mode-pack/</code> 에 직접 넣어도 됩니다.
+        </p>
         <p style="margin:12px 0 0;color:var(--muted);font-size:14px">
           설치 위치: <code class="inline">~/.agents/skills/orca-mode-pack/</code><br/>
           생성기: <code class="inline">~/.orca/studio/generate-pack.sh</code>
@@ -583,7 +588,7 @@ npx skills add https://github.com/stablyai/orca --skill orca-cli</pre>
 https://orca-lime.vercel.app
 
 AI 스킬 한 줄 설치 (Mac/Linux 터미널):
-curl -fsSL https://orca-lime.vercel.app/install.sh | bash
+curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
 
 그다음 에이전트에게:
 /orchestration-mode
@@ -1164,7 +1169,7 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
 
     const SITE_URL = "https://orca-lime.vercel.app";
-    const INSTALL_ONE = `curl -fsSL ${SITE_URL}/install.sh | bash`;
+    const INSTALL_ONE = `curl -fsSL ${SITE_URL}/setup-mode-pack.sh | bash`;
     const SHARE_BLURB =
 `Orca 조율 모드 만들기 (무료)
 ${SITE_URL}
@@ -1177,10 +1182,26 @@ ${INSTALL_ONE}
 
 ※ 각자 자기 컴퓨터에 설치. 제작자 PC 설정 불필요.`;
 
+    function downloadUrl(url, filename) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "";
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast("다운로드: " + filename);
+    }
+
     if ($("btnCopySite")) $("btnCopySite").onclick = () => copyText(SITE_URL);
     if ($("btnCopyShare")) $("btnCopyShare").onclick = () => copyText(SHARE_BLURB);
     if ($("btnCopyInstall")) $("btnCopyInstall").onclick = () => copyText(INSTALL_ONE);
     if ($("btnCopySkillOne")) $("btnCopySkillOne").onclick = () => copyText(INSTALL_ONE);
+    if ($("btnDlSkillMd")) $("btnDlSkillMd").onclick = () =>
+      downloadUrl(SITE_URL + "/skills/orca-mode-pack/SKILL.md", "SKILL.md");
+    if ($("btnDlRequest")) $("btnDlRequest").onclick = () =>
+      downloadUrl(SITE_URL + "/skills/orca-mode-pack/references/REQUEST.template.md", "REQUEST.template.md");
     if ($("btnCopySkillEngine")) $("btnCopySkillEngine").onclick = () =>
       copyText($("skillEngine").textContent);
     if ($("btnCopySkillShare")) $("btnCopySkillShare").onclick = () =>
