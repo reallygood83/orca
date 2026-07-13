@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Orca 조율(orchestration)을 쉽게 이해하고, 나만의 모드 팩을 만들어 설치하는 오프라인 스튜디오" />
+  <title>Orca 조율 스튜디오 · 나만의 모드 만들기</title>
+  <style>
+    :root {
+      --bg: #0b0d12; --bg2: #12161f; --panel: #161b26; --line: #2a3344;
+      --text: #e8edf7; --muted: #8b97ad; --accent: #7c9cff; --accent2: #5eead4;
+      --warn: #fbbf24; --ok: #4ade80; --radius: 14px;
+      --font: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+      --mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+    body { min-height: 100vh; }
+    .bg-grid {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,156,255,.18), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(94,234,212,.10), transparent),
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: auto, auto, 48px 48px, 48px 48px;
+    }
+    .wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+    .badge {
+      display: inline-flex; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: rgba(124,156,255,.08); color: var(--accent); font-size: 12px; font-weight: 600;
+    }
+    h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 14px 0 8px; line-height: 1.3; letter-spacing: -.02em; }
+    .lead { color: var(--muted); font-size: 1.05rem; line-height: 1.6; max-width: 48ch; margin: 0; }
+    .community {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center;
+    }
+    .community-label {
+      width: 100%; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .04em;
+    }
+    a.link-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+      text-decoration: none; border: 1px solid var(--line); transition: .15s ease;
+      color: var(--text); background: var(--panel);
+    }
+    a.link-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    a.link-btn .ico {
+      width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center;
+      font-size: 12px; font-weight: 800; flex: 0 0 auto;
+    }
+    a.link-btn.yt { border-color: rgba(255,0,0,.35); }
+    a.link-btn.yt .ico { background: #ff0000; color: #fff; }
+    a.link-btn.yt:hover { background: rgba(255,0,0,.12); }
+    a.link-btn.kakao { border-color: rgba(254,229,0,.45); }
+    a.link-btn.kakao .ico { background: #fee500; color: #191600; font-size: 11px; }
+    a.link-btn.kakao:hover { background: rgba(254,229,0,.12); }
+    a.link-btn.news { border-color: rgba(94,234,212,.4); }
+    a.link-btn.news .ico { background: rgba(94,234,212,.2); color: var(--accent2); }
+    a.link-btn.news:hover { background: rgba(94,234,212,.1); }
+    footer .community { margin-top: 14px; }
+    footer a.link-btn { font-size: 12px; padding: 8px 12px; }
+    nav.tabs {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 18px;
+      position: sticky; top: 0; z-index: 10; padding: 10px 0;
+      background: linear-gradient(var(--bg) 70%, transparent);
+    }
+    .tab {
+      border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+      border-radius: 999px; padding: 10px 16px; cursor: pointer; font: inherit; font-weight: 600; font-size: 14px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: #0b0d12; background: var(--accent); border-color: var(--accent); }
+    .panel { display: none; animation: fade .2s ease; }
+    .panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px 22px; margin-bottom: 14px;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 1.12rem; }
+    .card p, .card li { color: var(--muted); line-height: 1.65; }
+    .card strong { color: var(--text); }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+    .box {
+      border-radius: 12px; border: 1px solid var(--line); padding: 16px; background: var(--bg2);
+    }
+    .box.ok { border-color: rgba(74,222,128,.35); }
+    .box.warn { border-color: rgba(251,191,36,.35); }
+    .box .title { font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .flow {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+      padding: 16px 4px;
+    }
+    .node {
+      min-width: 110px; text-align: center; padding: 12px 10px; border-radius: 12px;
+      border: 1px solid var(--line); background: var(--bg2); font-weight: 700; font-size: 13px;
+    }
+    .node small { display: block; margin-top: 4px; font-weight: 500; color: var(--muted); font-size: 11px; }
+    .node.coord { border-color: rgba(167,139,250,.5); }
+    .node.worker { border-color: rgba(56,189,248,.5); }
+    .node.final { border-color: rgba(94,234,212,.5); }
+    .arrow { color: var(--muted); font-size: 18px; }
+    label.field { display: block; margin-bottom: 14px; }
+    label.field > span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    label.field .hint { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+    input[type=text], input[type=number], select, textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text);
+      border-radius: 10px; padding: 11px 12px; font: inherit; font-size: 14px;
+    }
+    textarea { min-height: 88px; resize: vertical; font-family: var(--mono); font-size: 12.5px; line-height: 1.45; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid rgba(124,156,255,.35); border-color: var(--accent); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    button.btn {
+      border: 0; border-radius: 10px; padding: 11px 16px; font: inherit; font-weight: 700; font-size: 14px;
+      cursor: pointer; background: var(--accent); color: #0b0d12;
+    }
+    button.btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    .preview-title { font-size: 12px; letter-spacing: .06em; color: var(--muted); margin: 16px 0 8px; font-weight: 600; }
+    .checklist { list-style: none; padding: 0; margin: 0; }
+    .checklist li {
+      display: flex; gap: 10px; align-items: flex-start; padding: 12px 0;
+      border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; line-height: 1.55;
+    }
+    .checklist li:last-child { border-bottom: 0; }
+    .stepnum {
+      flex: 0 0 28px; height: 28px; border-radius: 8px; background: rgba(124,156,255,.15);
+      color: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 12px;
+    }
+    .toast {
+      position: fixed; bottom: 22px; right: 22px; z-index: 50;
+      background: #10241a; border: 1px solid rgba(74,222,128,.4); color: var(--ok);
+      padding: 12px 16px; border-radius: 12px; font-weight: 600; font-size: 14px;
+      opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: none; }
+    code.inline, .dyn {
+      font-family: var(--mono); font-size: 12.5px; background: var(--bg);
+      border: 1px solid var(--line); padding: 2px 6px; border-radius: 6px; color: var(--accent2);
+    }
+    pre.box {
+      overflow: auto; color: var(--text); margin: 0; white-space: pre-wrap;
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.5;
+    }
+    .callout {
+      border-left: 3px solid var(--accent); padding: 10px 14px; margin: 12px 0 0;
+      background: rgba(124,156,255,.06); border-radius: 0 10px 10px 0; color: var(--muted); font-size: 14px;
+    }
+    .callout strong { color: var(--text); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+    .pill {
+      font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 999px;
+      background: var(--bg2); border: 1px solid var(--line); color: var(--muted);
+    }
+    .pill.hi { color: var(--text); border-color: rgba(124,156,255,.45); background: rgba(124,156,255,.12); }
+    .mode-bar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      padding: 12px 14px; margin-bottom: 14px; border-radius: 12px;
+      border: 1px solid rgba(124,156,255,.35); background: rgba(124,156,255,.08);
+      font-size: 13px; color: var(--muted);
+    }
+    .mode-bar strong { color: var(--text); }
+    .kv { display: grid; grid-template-columns: 120px 1fr; gap: 8px 12px; font-size: 14px; }
+    .kv dt { color: var(--muted); margin: 0; }
+    .kv dd { margin: 0; color: var(--text); font-weight: 600; word-break: break-all; }
+    footer { margin-top: 24px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .share-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+    .share-row input { flex: 1; min-width: 200px; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="wrap">
+    <header>
+      <div class="badge">Orca · 조율 스튜디오 · 오프라인 1파일</div>
+      <h1>여러 AI에게 일을 맡기고,<br/>끝까지 결과를 모으는 방법</h1>
+      <p class="lead">
+        Orca <strong style="color:var(--text)">조율(orchestration)</strong>을 쉽게 보고,
+        변수만 고르면 <strong style="color:var(--text)">설치 방법·파일 내용이 맞춰 바뀌는</strong> 내 모드를 만듭니다.
+      </p>
+      <div class="community" aria-label="배움의 달인 바로가기">
+        <span class="community-label">배움의 달인</span>
+        <a class="link-btn yt" href="https://www.youtube.com/@%EB%B0%B0%EC%9B%80%EC%9D%98%EB%8B%AC%EC%9D%B8-p5v" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">▶</span>
+          유튜브
+        </a>
+        <a class="link-btn kakao" href="https://open.kakao.com/o/gubGYQ7g" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">말</span>
+          오픈채팅
+        </a>
+        <a class="link-btn news" href="https://newsletter.teaboard.link/" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">✉</span>
+          뉴스레터
+        </a>
+      </div>
+    </header>
+
+    <!-- 현재 모드 요약: 모든 탭 공통, 변수 연동 -->
+    <div class="mode-bar" id="modeBar" aria-live="polite">
+      지금 만드는 모드:
+      <span class="pill hi" id="barDisplay">MOA</span>
+      <span>팀장 <strong id="barCoord">Grok</strong></span>
+      <span>· 실무 <strong id="barWorker">Claude</strong></span>
+      <span>· 동시 <strong id="barMax">3</strong>명</span>
+      <span>· 폴더 <code class="inline" id="barPath">~/.orca/moa/</code></span>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="concept" type="button">1. 이게 뭐야?</button>
+      <button class="tab" data-tab="flow" type="button">2. 어떻게 돌아가?</button>
+      <button class="tab" data-tab="wizard" type="button">3. 내 모드 만들기</button>
+      <button class="tab" data-tab="install" type="button">4. 설치 방법</button>
+      <button class="tab" data-tab="share" type="button">5. 배포·공유</button>
+    </nav>
+
+    <!-- 1 -->
+    <section id="panel-concept" class="panel active">
+      <div class="card">
+        <h2>한 줄 요약</h2>
+        <p>
+          <strong>조율(orchestration)</strong>은 AI 여러 명에게 일을 나눠 주고,
+          <em>끝났는지 확인한 뒤</em> 결과를 모으는 기능입니다. 코딩 앱이 아니라 <strong>팀장 역할</strong>에 가깝습니다.
+        </p>
+        <div class="pill-row">
+          <span class="pill">일 등록</span>
+          <span class="pill">실무에게 배정</span>
+          <span class="pill">끝날 때까지 대기</span>
+          <span class="pill">결과 모으기</span>
+        </div>
+      </div>
+      <div class="compare">
+        <div class="box ok">
+          <div class="title">✅ 조율 (끝까지 챙김)</div>
+          <p>팀장이 일을 나눠 주고, 끝날 때까지 기다린 다음 보고를 받습니다.</p>
+          <p style="margin-bottom:0"><strong>말:</strong> “감시해 줘”, “결과 모아와”</p>
+        </div>
+        <div class="box warn">
+          <div class="title">⚠️ 넘기기 (맡기고 손 뗌)</div>
+          <p>다른 AI 창에 일을 던지고 더 이상 안 챙깁니다.</p>
+          <p style="margin-bottom:0"><strong>말:</strong> “넘겨”, “저 에이전트한테 줘”</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>두 겹</h2>
+        <div class="compare">
+          <div class="box">
+            <div class="title" style="color:var(--accent)">① 엔진 (공용)</div>
+            <p><code class="inline">orchestration</code> 스킬 · <code class="inline">orca orchestration …</code></p>
+            <p style="margin-bottom:0">모두가 쓰는 기본 규칙</p>
+          </div>
+          <div class="box">
+            <div class="title" style="color:var(--accent2)">② 내 모드 (지금 만드는 것)</div>
+            <p><strong id="conceptModeName">MOA</strong>처럼 팀장·실무·명령을 정한 규칙</p>
+            <p style="margin-bottom:0">탭 3에서 바꾸고, 탭 4 설치 안내가 따라 바뀝니다</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>비유:</strong> 엔진 = 배달 앱, 내 모드 = 우리 가게 운영 방식.
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="panel-flow" class="panel">
+      <div class="card">
+        <h2>한 바퀴 흐름 <span style="font-weight:500;color:var(--muted);font-size:14px">(탭 3 설정 반영)</span></h2>
+        <div class="flow">
+          <div class="node coord">팀장<br/><small id="flow-coord">Grok</small></div>
+          <div class="arrow">→</div>
+          <div class="node">일 쪼개기<br/><small>2~6개</small></div>
+          <div class="arrow">→</div>
+          <div class="node worker">실무 AI<br/><small id="flow-worker">Claude</small></div>
+          <div class="arrow">→</div>
+          <div class="node">완료 보고<br/><small>worker_done</small></div>
+          <div class="arrow">→</div>
+          <div class="node final">최종 정리<br/><small id="flow-final">Grok가 정리</small></div>
+        </div>
+        <dl class="kv" style="margin-top:12px">
+          <dt>실무 명령</dt><dd id="flow-cmd" class="dyn">claude</dd>
+          <dt>동시 인원</dt><dd id="flow-max">3</dd>
+          <dt>폴더 정책</dt><dd id="flow-wt">상황에 맞게 자동</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h2>배정 예시 명령 <span style="font-weight:500;color:var(--muted);font-size:14px">(실무 명령 연동)</span></h2>
+        <pre class="box" id="flowCmdBlock"></pre>
+        <div class="callout">
+          <strong>--inject</strong>가 핵심입니다. “끝나면 완료 보고 보내” 안내를 실무 AI에게 같이 넣습니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="panel-wizard" class="panel">
+      <div class="card">
+        <h2>변수 고르기</h2>
+        <p>아래 값이 바뀌면 <strong>미리보기 · 설치 방법 · 다운로드 .md 내용</strong>이 전부 다시 맞춰집니다.</p>
+
+        <div class="row">
+          <label class="field">
+            <span>모드 이름 (영문, 폴더명)</span>
+            <input id="modeName" type="text" value="moa" autocomplete="off" />
+            <span class="hint">저장 위치: ~/.orca/이-이름/</span>
+          </label>
+          <label class="field">
+            <span>화면에 보일 이름</span>
+            <input id="displayName" type="text" value="MOA" autocomplete="off" />
+            <span class="hint">Quick Command 라벨</span>
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>팀장 (조율하는 AI)</span>
+            <select id="coord">
+              <option value="grok" selected>Grok — 쪼개기·정리에 좋음</option>
+              <option value="claude">Claude</option>
+              <option value="codex">Codex</option>
+              <option value="opencode">OpenCode</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>실무 (코딩하는 AI)</span>
+            <select id="worker">
+              <option value="claude" selected>Claude</option>
+              <option value="codex">Codex</option>
+              <option value="grok">Grok</option>
+              <option value="opencode">OpenCode</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>실무 AI 실행 명령</span>
+            <input id="workerCmd" type="text" value="claude" />
+            <span class="hint">터미널에서 실제로 치는 명령</span>
+          </label>
+          <label class="field">
+            <span>한 번에 돌릴 실무 수</span>
+            <input id="maxWorkers" type="number" min="1" max="6" value="3" />
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>작업 폴더 기본값</span>
+            <select id="wtPolicy">
+              <option value="active">지금 폴더에서 (같은 브랜치)</option>
+              <option value="isolated">새 worktree에서 독립 작업</option>
+              <option value="auto" selected>상황에 맞게 자동</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>부를 때 쓰는 말 (쉼표)</span>
+            <input id="triggers" type="text" value="MOA, 오케스트레이션" />
+          </label>
+        </div>
+        <label class="field">
+          <span>최종 정리에 넣을 항목</span>
+          <input id="finalSections" type="text" value="요약, 태스크별 결과, 결정/트레이드오프, 수정 파일, 리스크/다음 액션" />
+        </label>
+
+        <div class="actions">
+          <button class="btn" type="button" id="btnDownload">이 설정으로 .md 다운로드</button>
+          <button class="btn secondary" type="button" id="btnCopyQuick">바로가기 문구 복사</button>
+          <button class="btn secondary" type="button" id="btnCopyPlaybook">규칙 파일 복사</button>
+          <button class="btn secondary" type="button" id="btnCopyLink">설정 링크 복사</button>
+        </div>
+
+        <div class="preview-title">Orca 바로가기(Quick Command) 문장 — 지금 설정 반영</div>
+        <textarea id="outQuick" readonly></textarea>
+        <div class="preview-title">규칙 파일 (PLAYBOOK.md) — 지금 설정 반영</div>
+        <textarea id="outPlaybook" readonly style="min-height:220px"></textarea>
+      </div>
+    </section>
+
+    <!-- 4: 전부 JS로 채움 -->
+    <section id="panel-install" class="panel">
+      <div class="card">
+        <h2 id="installTitle">설치 방법</h2>
+        <p id="installLead"></p>
+        <dl class="kv" id="installKv"></dl>
+        <div class="callout" style="margin-top:14px">
+          <strong>중요:</strong> 다운로드 <code class="inline">.md</code> 는 원클릭 설치 파일이 아닙니다.
+          아래 순서대로 <strong>파일을 나눠 저장</strong>하고, Orca에 <strong>바로가기 문장을 붙여넣어야</strong> 끝납니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>따라 하기</h2>
+        <ol class="checklist" id="installSteps"></ol>
+      </div>
+
+      <div class="card">
+        <h2>터미널에 그대로 치기</h2>
+        <pre class="box" id="installShell"></pre>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn secondary" type="button" id="btnCopyShell">터미널 명령 복사</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>AI에게 시킬 때 (경로만 바꾸면 됨)</h2>
+        <pre class="box" id="installAiPrompt"></pre>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn secondary" type="button" id="btnCopyAi">AI 부탁 문장 복사</button>
+        </div>
+        <p style="margin:12px 0 0;font-size:14px;color:var(--muted)">
+          AI는 파일 저장·스킬 설치까지 대신할 수 있습니다.
+          Orca 앱 <strong>Quick Command 화면 붙여넣기</strong>는 보통 직접 한 번 해야 합니다.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>이 모드에 필요한 프로그램</h2>
+        <ul id="installReqs"></ul>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="panel-share" class="panel">
+      <div class="card">
+        <h2>다른 사람도 쓸 수 있나요?</h2>
+        <p><strong>가능합니다.</strong> 이 페이지는 서버·로그인·API 키가 없는 <strong>순수 HTML 1개</strong>입니다.</p>
+        <ul>
+          <li>인터넷 없이 브라우저에서 열어도 동작</li>
+          <li>설정은 브라우저 안에서만 계산 (서버로 안 보냄)</li>
+          <li>URL 뒤에 설정을 붙여 공유 가능 (아래 링크)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>배포 방법 (추천 순)</h2>
+        <ol class="checklist">
+          <li>
+            <span class="stepnum">1</span>
+            <div>
+              <strong>파일만 전달</strong><br/>
+              <code class="inline">index.html</code> 하나를 메일·메신저·USB로 보냄 → 더블클릭 또는 브라우저로 열기
+            </div>
+          </li>
+          <li>
+            <span class="stepnum">2</span>
+            <div>
+              <strong>GitHub Pages / Cloudflare Pages / Netlify</strong><br/>
+              저장소에 <code class="inline">index.html</code> 올리고 정적 호스팅 → 누구나 링크로 접속
+            </div>
+          </li>
+          <li>
+            <span class="stepnum">3</span>
+            <div>
+              <strong>설정 프리셋 링크</strong><br/>
+              탭 3에서 만든 값이 URL에 들어가므로, 그 링크를 주면 상대 화면에 같은 모드가 미리 채워짐
+            </div>
+          </li>
+        </ol>
+        <div class="preview-title">지금 설정의 공유 링크</div>
+        <div class="share-row">
+          <input id="shareUrl" type="text" readonly />
+          <button class="btn secondary" type="button" id="btnCopyShare">링크 복사</button>
+        </div>
+        <div class="callout">
+          상대방 PC에도 <strong>Orca + 팀장/실무 CLI + orchestration 스킬</strong>이 있어야
+          설치 후 실제로 조율이 돌아갑니다. 이 HTML은 “설명·팩 생성기”입니다.
+        </div>
+      </div>
+      <div class="card">
+        <h2>배포 시 알아둘 점</h2>
+        <ul>
+          <li>개인 경로(<code class="inline">/Users/나/...</code>)는 넣지 않았습니다. 모두 <code class="inline">$HOME/.orca/…</code> 형태입니다.</li>
+          <li>브라우저가 <code class="inline">file://</code> 에서 클립보드를 막을 수 있습니다. 안 되면 텍스트를 직접 드래그 복사하세요.</li>
+          <li>GitHub에 올릴 때 이 파일 하나만 있어도 됩니다. 다른 스크립트 없이 동작합니다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      순수 HTML · 설정은 이 브라우저에만 존재합니다 · 변수 변경 → 설치·다운로드 동기화
+      <div class="community" aria-label="배움의 달인 바로가기">
+        <a class="link-btn yt" href="https://www.youtube.com/@%EB%B0%B0%EC%9B%80%EC%9D%98%EB%8B%AC%EC%9D%B8-p5v" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">▶</span> 유튜브 배움의 달인
+        </a>
+        <a class="link-btn kakao" href="https://open.kakao.com/o/gubGYQ7g" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">말</span> 오픈채팅
+        </a>
+        <a class="link-btn news" href="https://newsletter.teaboard.link/" target="_blank" rel="noopener noreferrer">
+          <span class="ico" aria-hidden="true">✉</span> 뉴스레터
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status">복사됨</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const labels = { grok: "Grok", claude: "Claude", codex: "Codex", opencode: "OpenCode" };
+    const wtLabels = {
+      active: "지금 폴더에서 (같은 브랜치)",
+      isolated: "새 worktree에서 독립 작업",
+      auto: "상황에 맞게 자동",
+    };
+    const defaultCmd = {
+      codex: 'codex -m gpt-5.6 -c model_reasoning_effort="xhigh"',
+      claude: "claude",
+      grok: "grok",
+      opencode: "opencode",
+    };
+
+    const FIELD_IDS = ["modeName","displayName","coord","worker","workerCmd","maxWorkers","wtPolicy","triggers","finalSections"];
+
+    function vals() {
+      return {
+        modeName: ($("modeName").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-")) || "my-mode",
+        displayName: $("displayName").value.trim() || "MyMode",
+        coord: $("coord").value,
+        worker: $("worker").value,
+        workerCmd: $("workerCmd").value.trim() || "claude",
+        maxWorkers: Math.min(6, Math.max(1, Number($("maxWorkers").value) || 3)),
+        wtPolicy: $("wtPolicy").value,
+        triggers: $("triggers").value.trim() || "orchestrate",
+        finalSections: $("finalSections").value.trim() || "요약, 다음 액션",
+      };
+    }
+
+    function escCmd(cmd) {
+      return cmd.replace(/'/g, `'\\''`);
+    }
+
+    function wtBlock(v) {
+      const c = escCmd(v.workerCmd);
+      if (v.wtPolicy === "active") {
+        return `**기본: 지금 폴더에서 실무 AI 실행**
+
+\`\`\`bash
+orca terminal create --worktree active --title "<short>" \\
+  --command '${c}' --json
+orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+\`\`\``;
+      }
+      if (v.wtPolicy === "isolated") {
+        return `**기본: 새 worktree에서 독립 실행**
+
+\`\`\`bash
+orca worktree create --name "deep-<short>" --no-parent --json
+orca terminal create --worktree id:<FULL_WORKTREE_ID> --title "<short>" \\
+  --command '${c}' --json
+orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+\`\`\``;
+      }
+      return `**자동**: 독립 작업 → 새 worktree(\`--no-parent\`). 지금 브랜치·미커밋 필요 → \`--worktree active\`.
+
+예시(지금 폴더):
+\`\`\`bash
+orca terminal create --worktree active --title "<short>" \\
+  --command '${c}' --json
+\`\`\``;
+    }
+
+    function buildQuick(v) {
+      return `${v.displayName} mode (global). Read and follow $HOME/.orca/${v.modeName}/PLAYBOOK.md and the orchestration skill. If this repo has .orca/${v.displayName.toUpperCase()}.md or .orca/JINJING.md, also follow it as project overlay. You are ${labels[v.coord]} coordinator: decompose → dispatch ${labels[v.worker]} workers via orca orchestration task-create + dispatch --inject → check --wait for worker_done → synthesize FINAL. Supervised only, never full handoff. Max concurrent workers: ${v.maxWorkers}. Worker command: ${v.workerCmd}. Goal:`;
+    }
+
+    function buildPlaybook(v) {
+      const trig = v.triggers.split(",").map(s => s.trim()).filter(Boolean).map(s => `\`${s}\``).join(", ");
+      return `# ${v.displayName} Orchestration Mode (Orca) — Global
+
+${labels[v.coord]} = **팀장(coordinator)**. ${labels[v.worker]} = **실무(worker)**.
+실무가 끝나면 팀장이 **FINAL** 로 정리합니다.
+
+이것은 **끝까지 챙기는 조율(supervised orchestration)** 입니다. 넘기고 손 떼기(full handoff)가 아닙니다.
+
+- 엔진: orchestration 스킬 (\`orca orchestration …\`)
+- 이 파일: 그 엔진 위에 얹는 **내 모드 규칙**
+- 홈 경로: \`$HOME/.orca/${v.modeName}/\`
+
+---
+
+## 언제 쓰나
+
+사용자가 이렇게 말하면 이 파일을 따릅니다: ${trig}.
+
+---
+
+## 시작 전 확인
+
+\`\`\`bash
+orca status --json
+orca orchestration task-list --json
+command -v ${v.coord} || true
+command -v ${v.worker} || true
+\`\`\`
+
+Orca 설정 → Experimental → Orchestration 이 켜져 있어야 합니다.
+
+---
+
+## 역할
+
+| 역할 | 에이전트 | 할 일 |
+|------|----------|--------|
+| **팀장** | ${labels[v.coord]} | 일 쪼개기, 배정, 대기, FINAL 정리 |
+| **실무** | \`${v.workerCmd}\` | 맡은 일 수행 후 \`worker_done\` 1회 |
+
+---
+
+## 팀장 루프
+
+### 1) 일 쪼개기
+2~6개. 가능하면 서로 독립. 동시에 최대 **${v.maxWorkers}** 명.
+
+### 2) 일 등록
+\`\`\`bash
+orca orchestration task-create --spec "<할 일을 스스로 이해할 수 있게 자세히>" --json
+\`\`\`
+
+### 3) 실무 창 띄우기
+${wtBlock(v)}
+
+### 4) 배정 (반드시 --inject)
+\`\`\`bash
+orca orchestration dispatch --task <task_id> --to <handle> --inject --json
+\`\`\`
+${v.displayName} 모드에서는 배정만 하고 감시 끊지 않습니다.
+
+### 5) 기다리기
+\`\`\`bash
+orca orchestration check --wait \\
+  --types worker_done,escalation,decision_gate \\
+  --timeout-ms 900000 --json
+\`\`\`
+시간 초과 / 메시지 0개 = 실패가 아니라 체크포인트일 수 있음.
+
+### 6) FINAL 정리
+포함할 항목: ${v.finalSections}.
+
+---
+
+## 실무 의무
+inject 안내가 있으면: 일 수행 → 팀장 핸들로 \`worker_done\` **딱 1번**
+(taskId, dispatchId, filesModified, 필요 시 reportPath) → 대기.
+
+---
+
+## 프로젝트 추가 규칙
+저장소에 \`.orca/\` 오버레이나 \`AGENTS.md\` 가 있으면 함께 읽습니다.
+조율 방식은 전역 규칙 우선, 도메인/안전은 프로젝트 규칙 우선.
+`;
+    }
+
+    function buildDownloadPack(v) {
+      const quick = buildQuick(v);
+      const play = buildPlaybook(v);
+      return `# ${v.displayName} 조율 모드 팩
+
+> Orchestration Studio에서 생성됨 · **원클릭 설치 파일 아님**
+> 모드: \`${v.modeName}\` · 팀장: ${labels[v.coord]} · 실무: ${labels[v.worker]} (\`${v.workerCmd}\`) · 동시 ${v.maxWorkers}명
+
+---
+
+## 설치 순서 (이 모드 전용)
+
+1. 폴더 생성
+   \`\`\`bash
+   mkdir -p "$HOME/.orca/${v.modeName}/prompts"
+   \`\`\`
+2. 아래 **PLAYBOOK.md** 본문 전체를 저장
+   → \`$HOME/.orca/${v.modeName}/PLAYBOOK.md\`
+3. 아래 **quick-command.txt** 한 줄을 저장
+   → \`$HOME/.orca/${v.modeName}/prompts/quick-command.txt\`
+4. 엔진 스킬 (PC당 1회)
+   \`\`\`bash
+   npx skills add https://github.com/stablyai/orca --skill orchestration
+   npx skills add https://github.com/stablyai/orca --skill orca-cli
+   \`\`\`
+5. Orca → Settings → Quick Commands
+   - Label: **${v.displayName}**
+   - Scope: **Global**
+   - Text: quick-command.txt 전체
+6. Experimental → Orchestration ON
+7. CLI 확인: \`${v.coord}\`, \`${v.worker}\` (실무 명령: \`${v.workerCmd}\`)
+8. **${labels[v.coord]}** 탭에서 Quick Command **${v.displayName}** → Goal 입력
+
+### AI에게 맡길 때
+\`\`\`
+이 파일을 ${v.displayName} 조율 모드로 설치해 줘.
+경로: (이 파일의 실제 경로)
+
+1) $HOME/.orca/${v.modeName}/PLAYBOOK.md 와 prompts/quick-command.txt 로 나눠 저장
+2) orchestration / orca-cli 스킬 없으면 설치
+3) Quick Command에 넣을 문장을 보여 줘 (UI 붙여넣기는 내가 함)
+\`\`\`
+
+---
+
+## quick-command.txt
+
+\`\`\`
+${quick}
+\`\`\`
+
+---
+
+## PLAYBOOK.md
+
+${play}
+`;
+    }
+
+    function buildShell(v) {
+      return `# ${v.displayName} (${v.modeName}) 설치 힌트
+mkdir -p "$HOME/.orca/${v.modeName}/prompts"
+
+# 1) 스튜디오에서 다운로드한 .md 를 연 뒤
+#    PLAYBOOK 본문 → $HOME/.orca/${v.modeName}/PLAYBOOK.md
+#    quick-command 한 줄 → $HOME/.orca/${v.modeName}/prompts/quick-command.txt
+#
+# 또는 AI에게 위 경로로 나눠 저장 요청
+
+npx skills add https://github.com/stablyai/orca --skill orchestration
+npx skills add https://github.com/stablyai/orca --skill orca-cli
+
+# Orca → Settings → Quick Commands
+#   Label: ${v.displayName}
+#   Scope: Global
+#   Text:  $HOME/.orca/${v.modeName}/prompts/quick-command.txt 내용
+
+# 확인
+command -v orca && orca status --json
+command -v ${v.coord} || echo "팀장 CLI 없음: ${v.coord}"
+command -v ${v.worker} || echo "실무 CLI 없음: ${v.worker}"
+`;
+    }
+
+    function buildAiPrompt(v) {
+      return `이 파일을 ${v.displayName} 조율 모드로 설치해 줘.
+경로: (다운로드한 ${v.modeName}-orchestration-pack.md 경로를 여기에)
+
+할 일:
+1) $HOME/.orca/${v.modeName}/PLAYBOOK.md 와
+   $HOME/.orca/${v.modeName}/prompts/quick-command.txt 로 나눠 저장
+2) orchestration / orca-cli 스킬이 없으면 설치
+3) Quick Command에 넣을 문장을 마지막에 보여 줘
+   (Orca 설정 UI 붙여넣기는 내가 할 테니 문장만 정리)
+4) 이 모드 요약: 팀장=${labels[v.coord]}, 실무=${labels[v.worker]} (${v.workerCmd}), 동시 ${v.maxWorkers}명
+
+설치 후 무엇이 어디에 생겼는지 짧게 보고해.`;
+    }
+
+    function buildShareQuery(v) {
+      const p = new URLSearchParams();
+      p.set("name", v.modeName);
+      p.set("display", v.displayName);
+      p.set("coord", v.coord);
+      p.set("worker", v.worker);
+      p.set("cmd", v.workerCmd);
+      p.set("max", String(v.maxWorkers));
+      p.set("wt", v.wtPolicy);
+      p.set("triggers", v.triggers);
+      p.set("finals", v.finalSections);
+      return p.toString();
+    }
+
+    function applyFromQuery() {
+      const q = new URLSearchParams(location.search);
+      if (![...q.keys()].length) return;
+      if (q.get("name")) $("modeName").value = q.get("name");
+      if (q.get("display")) $("displayName").value = q.get("display");
+      if (q.get("coord")) $("coord").value = q.get("coord");
+      if (q.get("worker")) $("worker").value = q.get("worker");
+      if (q.get("cmd")) $("workerCmd").value = q.get("cmd");
+      if (q.get("max")) $("maxWorkers").value = q.get("max");
+      if (q.get("wt")) $("wtPolicy").value = q.get("wt");
+      if (q.get("triggers")) $("triggers").value = q.get("triggers");
+      if (q.get("finals")) $("finalSections").value = q.get("finals");
+    }
+
+    function refreshInstall(v) {
+      $("installTitle").textContent = `${v.displayName} 모드 설치 방법`;
+      $("installLead").innerHTML =
+        `지금 탭 3 설정 기준입니다. 폴더 <code class="inline">$HOME/.orca/${v.modeName}/</code> 에 두고, ` +
+        `Orca 바로가기 이름은 <strong>${v.displayName}</strong>, 팀장은 <strong>${labels[v.coord]}</strong>, ` +
+        `실무는 <strong>${labels[v.worker]}</strong> (<code class="inline">${escapeHtml(v.workerCmd)}</code>) 입니다.`;
+
+      $("installKv").innerHTML = `
+        <dt>모드</dt><dd>${escapeHtml(v.displayName)} <span style="color:var(--muted);font-weight:500">(${escapeHtml(v.modeName)})</span></dd>
+        <dt>저장 위치</dt><dd><code class="inline">$HOME/.orca/${escapeHtml(v.modeName)}/</code></dd>
+        <dt>규칙 파일</dt><dd><code class="inline">$HOME/.orca/${escapeHtml(v.modeName)}/PLAYBOOK.md</code></dd>
+        <dt>바로가기 파일</dt><dd><code class="inline">$HOME/.orca/${escapeHtml(v.modeName)}/prompts/quick-command.txt</code></dd>
+        <dt>Quick Command</dt><dd>Label <strong>${escapeHtml(v.displayName)}</strong> · Global</dd>
+        <dt>팀장 탭</dt><dd>${escapeHtml(labels[v.coord])} 에이전트에서 실행</dd>
+        <dt>실무 명령</dt><dd><code class="inline">${escapeHtml(v.workerCmd)}</code></dd>
+        <dt>동시 실무</dt><dd>${v.maxWorkers}명</dd>
+        <dt>폴더 정책</dt><dd>${escapeHtml(wtLabels[v.wtPolicy] || v.wtPolicy)}</dd>
+        <dt>트리거 말</dt><dd>${escapeHtml(v.triggers)}</dd>
+      `;
+
+      $("installSteps").innerHTML = `
+        <li><span class="stepnum">1</span><div><strong>폴더 만들기</strong><br/>
+          <code class="inline">mkdir -p "$HOME/.orca/${escapeHtml(v.modeName)}/prompts"</code></div></li>
+        <li><span class="stepnum">2</span><div><strong>규칙 저장</strong><br/>
+          탭 3의 PLAYBOOK(또는 다운로드 .md 의 PLAYBOOK 섹션) →
+          <code class="inline">$HOME/.orca/${escapeHtml(v.modeName)}/PLAYBOOK.md</code></div></li>
+        <li><span class="stepnum">3</span><div><strong>바로가기 문장 저장</strong><br/>
+          탭 3의 Quick Command 한 줄 →
+          <code class="inline">$HOME/.orca/${escapeHtml(v.modeName)}/prompts/quick-command.txt</code></div></li>
+        <li><span class="stepnum">4</span><div><strong>엔진 스킬 (PC당 1회)</strong><br/>
+          <code class="inline">npx skills add https://github.com/stablyai/orca --skill orchestration</code><br/>
+          <code class="inline">npx skills add https://github.com/stablyai/orca --skill orca-cli</code></div></li>
+        <li><span class="stepnum">5</span><div><strong>Orca Quick Command 등록</strong><br/>
+          Settings → Quick Commands<br/>
+          Label: <strong>${escapeHtml(v.displayName)}</strong> · Scope: <strong>Global</strong><br/>
+          Text: quick-command.txt 전체 붙여넣기</div></li>
+        <li><span class="stepnum">6</span><div><strong>전제 확인</strong><br/>
+          Experimental → Orchestration ON<br/>
+          CLI: <code class="inline">${escapeHtml(v.coord)}</code>, <code class="inline">${escapeHtml(v.worker)}</code>
+          (실무 실행: <code class="inline">${escapeHtml(v.workerCmd)}</code>)</div></li>
+        <li><span class="stepnum">7</span><div><strong>사용</strong><br/>
+          <strong>${escapeHtml(labels[v.coord])}</strong> 탭 → Quick Command <strong>${escapeHtml(v.displayName)}</strong>
+          → Goal 뒤에 할 일 적기 → Enter</div></li>
+      `;
+
+      $("installShell").textContent = buildShell(v);
+      $("installAiPrompt").textContent = buildAiPrompt(v);
+
+      const reqs = [
+        `Orca 데스크톱 앱 (orchestration Experimental ON)`,
+        `orca CLI (PATH)`,
+        `팀장 CLI: ${v.coord} → ${labels[v.coord]}`,
+        `실무 CLI: ${v.worker} → 명령 \`${v.workerCmd}\``,
+        `Node/npx (skills 설치용)`,
+        `네트워크 (skills 최초 설치 시)`,
+      ];
+      $("installReqs").innerHTML = reqs.map(r => `<li>${escapeHtml(r)}</li>`).join("");
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function refresh() {
+      const v = vals();
+
+      // 공통 바
+      $("barDisplay").textContent = v.displayName;
+      $("barCoord").textContent = labels[v.coord];
+      $("barWorker").textContent = labels[v.worker];
+      $("barMax").textContent = String(v.maxWorkers);
+      $("barPath").textContent = `~/.orca/${v.modeName}/`;
+      $("conceptModeName").textContent = v.displayName;
+
+      // 흐름
+      $("flow-coord").textContent = labels[v.coord];
+      $("flow-worker").textContent = labels[v.worker];
+      $("flow-final").textContent = labels[v.coord] + "가 정리";
+      $("flow-cmd").textContent = v.workerCmd;
+      $("flow-max").textContent = String(v.maxWorkers);
+      $("flow-wt").textContent = wtLabels[v.wtPolicy] || v.wtPolicy;
+      $("flowCmdBlock").textContent =
+`# 실무 창 예시 (${v.displayName})
+orca terminal create --worktree active --title "worker-1" \\
+  --command '${escCmd(v.workerCmd)}' --json
+orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+
+orca orchestration task-create --spec "할 일 설명" --json
+orca orchestration dispatch --task <task_id> --to <handle> --inject --json
+orca orchestration check --wait --types worker_done,escalation,decision_gate --timeout-ms 900000 --json`;
+
+      // 미리보기
+      $("outQuick").value = buildQuick(v);
+      $("outPlaybook").value = buildPlaybook(v);
+
+      // 설치 탭 전체
+      refreshInstall(v);
+
+      // 공유 URL
+      const base = location.href.split("?")[0].split("#")[0];
+      $("shareUrl").value = base + "?" + buildShareQuery(v);
+
+      // URL 동기화 (히스토리 더럽히지 않게 replace)
+      try {
+        history.replaceState(null, "", "?" + buildShareQuery(v));
+      } catch (_) { /* file:// 일부 환경 */ }
+    }
+
+    function toast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1600);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("클립보드에 복사됨");
+      } catch {
+        toast("복사 실패 — 텍스트를 직접 선택하세요");
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        $("panel-" + btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    FIELD_IDS.forEach((id) => $(id).addEventListener("input", refresh));
+
+    let workerTouched = false;
+    $("workerCmd").addEventListener("input", () => { workerTouched = true; });
+    $("worker").addEventListener("change", () => {
+      if (!workerTouched) {
+        $("workerCmd").value = defaultCmd[$("worker").value] || $("workerCmd").value;
+      }
+      refresh();
+    });
+
+    $("btnCopyQuick").onclick = () => copyText($("outQuick").value);
+    $("btnCopyPlaybook").onclick = () => copyText($("outPlaybook").value);
+    $("btnCopyShell").onclick = () => copyText($("installShell").textContent);
+    $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
+    $("btnCopyShare").onclick = () => copyText($("shareUrl").value);
+    $("btnCopyLink").onclick = () => copyText($("shareUrl").value);
+
+    $("btnDownload").onclick = () => {
+      const v = vals();
+      const blob = new Blob([buildDownloadPack(v)], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${v.modeName}-orchestration-pack.md`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast(`${v.displayName} 팩 다운로드`);
+    };
+
+    applyFromQuery();
+    refresh();
+  </script>
+</body>
+</html>
