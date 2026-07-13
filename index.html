@@ -193,8 +193,6 @@
     .kv dt { color: var(--muted); margin: 0; }
     .kv dd { margin: 0; color: var(--text); font-weight: 600; word-break: break-all; }
     footer { margin-top: 24px; color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .share-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-    .share-row input { flex: 1; min-width: 200px; }
   </style>
 </head>
 <body>
@@ -241,7 +239,6 @@
       <button class="tab" data-tab="flow" type="button">2. 어떻게 돌아가?</button>
       <button class="tab" data-tab="wizard" type="button">3. 내 모드 만들기</button>
       <button class="tab" data-tab="install" type="button">4. 설치 방법</button>
-      <button class="tab" data-tab="share" type="button">5. 배포·공유</button>
     </nav>
 
     <!-- 1 -->
@@ -393,7 +390,6 @@
           <button class="btn" type="button" id="btnDownload">이 설정으로 .md 다운로드</button>
           <button class="btn secondary" type="button" id="btnCopyQuick">바로가기 문구 복사</button>
           <button class="btn secondary" type="button" id="btnCopyPlaybook">규칙 파일 복사</button>
-          <button class="btn secondary" type="button" id="btnCopyLink">설정 링크 복사</button>
         </div>
 
         <div class="preview-title">Orca 바로가기(Quick Command) 문장 — 지금 설정 반영</div>
@@ -443,62 +439,6 @@
       <div class="card">
         <h2>이 모드에 필요한 프로그램</h2>
         <ul id="installReqs"></ul>
-      </div>
-    </section>
-
-    <!-- 5 -->
-    <section id="panel-share" class="panel">
-      <div class="card">
-        <h2>다른 사람도 쓸 수 있나요?</h2>
-        <p><strong>가능합니다.</strong> 이 페이지는 서버·로그인·API 키가 없는 <strong>순수 HTML 1개</strong>입니다.</p>
-        <ul>
-          <li>인터넷 없이 브라우저에서 열어도 동작</li>
-          <li>설정은 브라우저 안에서만 계산 (서버로 안 보냄)</li>
-          <li>URL 뒤에 설정을 붙여 공유 가능 (아래 링크)</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h2>배포 방법 (추천 순)</h2>
-        <ol class="checklist">
-          <li>
-            <span class="stepnum">1</span>
-            <div>
-              <strong>파일만 전달</strong><br/>
-              <code class="inline">index.html</code> 하나를 메일·메신저·USB로 보냄 → 더블클릭 또는 브라우저로 열기
-            </div>
-          </li>
-          <li>
-            <span class="stepnum">2</span>
-            <div>
-              <strong>GitHub Pages / Cloudflare Pages / Netlify</strong><br/>
-              저장소에 <code class="inline">index.html</code> 올리고 정적 호스팅 → 누구나 링크로 접속
-            </div>
-          </li>
-          <li>
-            <span class="stepnum">3</span>
-            <div>
-              <strong>설정 프리셋 링크</strong><br/>
-              탭 3에서 만든 값이 URL에 들어가므로, 그 링크를 주면 상대 화면에 같은 모드가 미리 채워짐
-            </div>
-          </li>
-        </ol>
-        <div class="preview-title">지금 설정의 공유 링크</div>
-        <div class="share-row">
-          <input id="shareUrl" type="text" readonly />
-          <button class="btn secondary" type="button" id="btnCopyShare">링크 복사</button>
-        </div>
-        <div class="callout">
-          상대방 PC에도 <strong>Orca + 팀장/실무 CLI + orchestration 스킬</strong>이 있어야
-          설치 후 실제로 조율이 돌아갑니다. 이 HTML은 “설명·팩 생성기”입니다.
-        </div>
-      </div>
-      <div class="card">
-        <h2>배포 시 알아둘 점</h2>
-        <ul>
-          <li>개인 경로(<code class="inline">/Users/나/...</code>)는 넣지 않았습니다. 모두 <code class="inline">$HOME/.orca/…</code> 형태입니다.</li>
-          <li>브라우저가 <code class="inline">file://</code> 에서 클립보드를 막을 수 있습니다. 안 되면 텍스트를 직접 드래그 복사하세요.</li>
-          <li>GitHub에 올릴 때 이 파일 하나만 있어도 됩니다. 다른 스크립트 없이 동작합니다.</li>
-        </ul>
       </div>
     </section>
 
@@ -775,34 +715,6 @@ command -v ${v.worker} || echo "실무 CLI 없음: ${v.worker}"
 설치 후 무엇이 어디에 생겼는지 짧게 보고해.`;
     }
 
-    function buildShareQuery(v) {
-      const p = new URLSearchParams();
-      p.set("name", v.modeName);
-      p.set("display", v.displayName);
-      p.set("coord", v.coord);
-      p.set("worker", v.worker);
-      p.set("cmd", v.workerCmd);
-      p.set("max", String(v.maxWorkers));
-      p.set("wt", v.wtPolicy);
-      p.set("triggers", v.triggers);
-      p.set("finals", v.finalSections);
-      return p.toString();
-    }
-
-    function applyFromQuery() {
-      const q = new URLSearchParams(location.search);
-      if (![...q.keys()].length) return;
-      if (q.get("name")) $("modeName").value = q.get("name");
-      if (q.get("display")) $("displayName").value = q.get("display");
-      if (q.get("coord")) $("coord").value = q.get("coord");
-      if (q.get("worker")) $("worker").value = q.get("worker");
-      if (q.get("cmd")) $("workerCmd").value = q.get("cmd");
-      if (q.get("max")) $("maxWorkers").value = q.get("max");
-      if (q.get("wt")) $("wtPolicy").value = q.get("wt");
-      if (q.get("triggers")) $("triggers").value = q.get("triggers");
-      if (q.get("finals")) $("finalSections").value = q.get("finals");
-    }
-
     function refreshInstall(v) {
       $("installTitle").textContent = `${v.displayName} 모드 설치 방법`;
       $("installLead").innerHTML =
@@ -904,15 +816,6 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
 
       // 설치 탭 전체
       refreshInstall(v);
-
-      // 공유 URL
-      const base = location.href.split("?")[0].split("#")[0];
-      $("shareUrl").value = base + "?" + buildShareQuery(v);
-
-      // URL 동기화 (히스토리 더럽히지 않게 replace)
-      try {
-        history.replaceState(null, "", "?" + buildShareQuery(v));
-      } catch (_) { /* file:// 일부 환경 */ }
     }
 
     function toast(msg) {
@@ -955,8 +858,6 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     $("btnCopyPlaybook").onclick = () => copyText($("outPlaybook").value);
     $("btnCopyShell").onclick = () => copyText($("installShell").textContent);
     $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
-    $("btnCopyShare").onclick = () => copyText($("shareUrl").value);
-    $("btnCopyLink").onclick = () => copyText($("shareUrl").value);
 
     $("btnDownload").onclick = () => {
       const v = vals();
@@ -969,7 +870,6 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
       toast(`${v.displayName} 팩 다운로드`);
     };
 
-    applyFromQuery();
     refresh();
   </script>
 </body>
