@@ -223,7 +223,28 @@
         팀장·실무 AI만 고르면 <strong style="color:var(--text)">설치 문장과 파일이 맞춰 만들어집니다</strong>.
         다른 사람 PC 설정은 필요 없습니다 — 각자 자기 컴퓨터에 설치합니다.
       </p>
+      <div class="pill-row" style="margin-top:14px">
+        <span class="pill hi">공개 주소 · https://orca-lime.vercel.app</span>
+        <button class="btn secondary" type="button" id="btnCopySite" style="padding:8px 12px;font-size:13px">사이트 링크 복사</button>
+        <button class="btn secondary" type="button" id="btnCopyShare" style="padding:8px 12px;font-size:13px">공유 문구 복사</button>
+      </div>
     </header>
+
+    <div class="card" style="margin-top:16px;border-color:rgba(94,234,212,.35)">
+      <h2 style="margin-top:0">이 사이트를 사람들에게 배포하려면?</h2>
+      <p style="margin:0 0 8px">
+        <strong>링크만 공유하면 됩니다.</strong>
+        설정은 서버에 저장되지 않고, 각자 브라우저에서 만든 뒤 <strong>자기 PC(Orca)</strong>에 설치합니다.
+      </p>
+      <ol class="checklist" style="margin:0">
+        <li><span class="stepnum">1</span><div><strong>공유:</strong> <code class="inline">https://orca-lime.vercel.app</code> (유튜브 설명·오픈채팅·뉴스레터)</div></li>
+        <li><span class="stepnum">2</span><div><strong>사용자:</strong> 탭 3에서 모드 만들기 → 탭 4 설치 (Quick Command 등록까지)</div></li>
+        <li><span class="stepnum">3</span><div><strong>당신(운영):</strong> GitHub <code class="inline">main</code> 수정 시 Vercel이 자동 재배포</div></li>
+      </ol>
+      <p style="margin:10px 0 0;font-size:13px;color:var(--muted)">
+        상세 가이드: GitHub 저장소의 <code class="inline">사용방법.md</code>
+      </p>
+    </div>
 
     <!-- 현재 모드 요약: 모든 탭 공통, 변수 연동 -->
     <div class="mode-bar" id="modeBar" aria-live="polite">
@@ -1043,6 +1064,20 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     $("btnCopyPlaybook").onclick = () => copyText($("outPlaybook").value);
     $("btnCopyShell").onclick = () => copyText($("installShell").textContent);
     $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
+
+    const SITE_URL = "https://orca-lime.vercel.app";
+    const SHARE_BLURB =
+`Orca 조율 모드 만들기 (무료)
+${SITE_URL}
+
+1) 사이트 접속
+2) 탭 3에서 팀장·실무 모델 고르기
+3) 탭 4 설치 방법 → 자기 PC에 저장 + Orca Quick Command 등록
+
+※ 각자 자기 컴퓨터에 설치합니다. 제작자 PC 설정 불필요.`;
+
+    if ($("btnCopySite")) $("btnCopySite").onclick = () => copyText(SITE_URL);
+    if ($("btnCopyShare")) $("btnCopyShare").onclick = () => copyText(SHARE_BLURB);
 
     $("btnDownload").onclick = () => {
       const v = vals();
