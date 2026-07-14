@@ -1,6 +1,6 @@
 # Orca Mode Studio
 
-**Product URL:** https://orca-lime.vercel.app  
+**Product URL:** https://orca.teaboard.link  
 
 A **local-first, multi-agent orchestration mode designer** for [Orca](https://orca.com)-compatible workflows.
 
@@ -25,13 +25,13 @@ No cloud account is required for mode design. Mode configuration is stored **on 
 ## User journeys
 
 ### A) Web studio
-1. Open https://orca-lime.vercel.app  
+1. Open https://orca.teaboard.link  
 2. **Build mode** — name, coordinator, worker checkboxes, policies  
 3. **Install pack** — download / copy Quick Command into Orca  
 
 ### B) Agent skill
 ```bash
-curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
+curl -fsSL https://orca.teaboard.link/setup-mode-pack.sh | bash
 ```
 Then in an agent: `/orchestration-mode`
 

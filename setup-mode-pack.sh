@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Orca Mode Pack — one-line installer for end users
 #
-#   curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
+#   curl -fsSL https://orca.teaboard.link/setup-mode-pack.sh | bash
 #
 # Installs:
 #   ~/.agents/skills/orca-mode-pack/   (agent skill)
 #   ~/.orca/studio/generate-pack.sh    (CLI pack generator)
 set -euo pipefail
 
-SITE="${ORCA_SITE:-https://orca-lime.vercel.app}"
+SITE="${ORCA_SITE:-https://orca.teaboard.link}"
 SKILL_DIR="${ORCA_INSTALL_DIR:-$HOME/.agents/skills/orca-mode-pack}"
 TOOLS_DIR="${ORCA_TOOLS_DIR:-$HOME/.orca/studio}"
 

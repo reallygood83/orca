@@ -631,7 +631,7 @@
       </div>
       <div class="card" style="border-color:rgba(124,156,255,.45)">
         <h2>One-line install (Mac / Linux / WSL)</h2>
-        <pre class="box" id="skillOneLiner">curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash</pre>
+        <pre class="box" id="skillOneLiner">curl -fsSL https://orca.teaboard.link/setup-mode-pack.sh | bash</pre>
         <div class="actions" style="margin-top:12px">
           <button class="btn" type="button" id="btnCopySkillOne">Copy install command</button>
           <button class="btn secondary" type="button" id="btnDlSkillMd">Download SKILL.md</button>
@@ -661,11 +661,11 @@ npx skills add https://github.com/stablyai/orca --skill orca-cli</pre>
       <div class="card">
         <h2>Shareable blurb</h2>
         <pre class="box" id="skillShareBlurb">Orca Mode Studio
-https://orca-lime.vercel.app
+https://orca.teaboard.link
 
 Create multi-agent modes (Codex + Claude + Grok).
 Optional skill install:
-curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
+curl -fsSL https://orca.teaboard.link/setup-mode-pack.sh | bash
 
 Then: /orchestration-mode</pre>
         <div class="actions" style="margin-top:12px">
@@ -686,7 +686,7 @@ Then: /orchestration-mode</pre>
       <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
         <a href="https://github.com/reallygood83/orca" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/reallygood83/orca/blob/main/README.md" target="_blank" rel="noopener">README</a>
-        <a href="https://orca-lime.vercel.app/setup-mode-pack.sh" target="_blank" rel="noopener">setup-mode-pack.sh</a>
+        <a href="https://orca.teaboard.link/setup-mode-pack.sh" target="_blank" rel="noopener">setup-mode-pack.sh</a>
       </div>
     </footer>
   </div>
@@ -1285,7 +1285,7 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     $("btnCopyShell").onclick = () => copyText($("installShell").textContent);
     $("btnCopyAi").onclick = () => copyText($("installAiPrompt").textContent);
 
-    const SITE_URL = "https://orca-lime.vercel.app";
+    const SITE_URL = "https://orca.teaboard.link";
     const INSTALL_ONE = `curl -fsSL ${SITE_URL}/setup-mode-pack.sh | bash`;
     const SHARE_BLURB =
 `Orca Mode Studio — multi-agent orchestration modes
