@@ -31,41 +31,40 @@
 
 ---
 
-## 3. 실무 워커 (Workers) — 모델은 여기에
+## 3. 실무 워커 (Workers) — **여러 명 가능**
 
-> **dispatch 에는 모델 옵션이 없습니다.**  
-> `command` 한 줄에 agent + model + effort 를 모두 넣습니다.
+> **한 명일 필요 없음.** Codex + Claude + Grok 을 동시에 팀으로 둘 수 있습니다.  
+> **dispatch 에는 모델 옵션이 없습니다.** 각 워커의 `command` 에 모델·effort 를 넣습니다.  
+> 실행 시 **에이전트마다 별도 터미널** + 각각 `dispatch --inject`.
 
-### Worker A — implement (필수)
+### Worker A — 예: Codex implement
 
-| 필드 | 값 | 예시 |
-|------|-----|------|
-| role | `implement` | implement / review / test / research |
-| agent | `codex` | codex / claude / grok / opencode |
-| model | `gpt-5.6` | CLI가 받는 모델 id |
-| effort | `xhigh` | Codex reasoning 등 (없으면 비움) |
-| command | `codex -m gpt-5.6 -c model_reasoning_effort="xhigh"` | **실제 터미널 명령** |
+| 필드 | 값 |
+|------|-----|
+| role | `implement` |
+| agent | `codex` |
+| command | `codex -m gpt-5.6 -c model_reasoning_effort="xhigh"` |
+| ownership | `edit` |
 
-### Worker B — review (선택)
+### Worker B — 예: Claude review
 
 | 필드 | 값 |
 |------|-----|
 | role | `review` |
 | agent | `claude` |
-| model | `sonnet` |
-| effort | |
 | command | `claude --model sonnet` |
-| ownership | `review-only` | review-only = 수정 권한 없음 |
+| ownership | `review-only` |
 
-### Worker C (선택)
+### Worker C — 예: Grok research / implement
 
 | 필드 | 값 |
 |------|-----|
-| role | |
-| agent | |
-| model | |
-| effort | |
-| command | |
+| role | `research` 또는 `implement` |
+| agent | `grok` |
+| command | `grok -m grok-4.5 --reasoning-effort xhigh` |
+| ownership | `edit` |
+
+원하는 만큼 Worker D, E… 추가 가능. 최소 1명.
 
 ---
 

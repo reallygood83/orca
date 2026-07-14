@@ -51,9 +51,10 @@ JSON schema: [`references/mode-pack.schema.json`](references/mode-pack.schema.js
 | `displayName` | yes | `MyOrch` |
 | `coordination` | yes | `supervised` (default) \| `handoff` |
 | `coordinator.agent` | yes | `grok` \| `claude` \| `codex` |
-| `workers[]` | ≥1 | role + agent + command |
+| `workers[]` | ≥1 (**여러 명 OK**) | Codex+Claude+Grok 동시 가능 |
 | `workers[].role` | yes | `implement` \| `review` \| `test` \| `research` |
-| `workers[].command` | yes | `codex -m gpt-5.6 -c model_reasoning_effort="xhigh"` |
+| `workers[].agent` | yes | `codex` \| `claude` \| `grok` \| … |
+| `workers[].command` | yes | full CLI command with model/effort |
 | `worktreePolicy` | yes | `active` \| `isolated` \| `auto` |
 | `maxConcurrent` | no | default `3` |
 | `triggers` | no | slash/aliases for Quick Command |
@@ -104,16 +105,20 @@ Or open studio: `open "$HOME/.orca/jinjing/studio/index.html"` (tab 3).
 5. On all `worker_done`, synthesize FINAL with `finalSections`.
 6. Never treat review-only `worker_done` as edit authority unless PLAYBOOK says coordinator owns fixes.
 
-## Multi-role dispatch
+## Multi-agent / multi-role dispatch
 
-If pack has multiple worker roles:
+**Workers are a pool, not a single model.** Example:
 
 ```text
-implement → workerCmd
-review    → reviewCmd (if set)
+implement → codex -m gpt-5.6 … 
+review    → claude --model sonnet
+research  → grok -m grok-4.5 …
 ```
 
-Create **separate terminals** per role (different handles), different task specs, clear ownership in `--spec` text.
+- Create **separate terminals** per worker (different handles)
+- Different task specs with `[role/agent]` prefix
+- `maxConcurrent` caps parallel dispatches
+- Review-only `worker_done` ≠ edit authority
 
 ## Anti-patterns
 

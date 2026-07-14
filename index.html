@@ -400,10 +400,8 @@
         </div>
         <div class="callout" style="margin-bottom:14px">
           <strong>모델은 dispatch 옵션이 아닙니다.</strong>
-          아래 <em>실무 실행 명령</em> 한 줄에 agent + model + effort를 넣습니다.
-          채팅 에이전트에게 맡길 때는 REQUEST 템플릿
-          (<code class="inline">orca-mode-pack</code> 스킬) 또는 CLI
-          <code class="inline">generate-pack.sh --worker-cmd '…'</code> 를 쓰세요.
+          실무는 <strong>여러 명</strong> 가능합니다 (Codex + Claude + Grok 동시).
+          각 실무의 <em>실행 명령</em>에 agent + model + effort를 넣습니다.
         </div>
         <div class="row">
           <label class="field">
@@ -425,71 +423,93 @@
           </label>
         </div>
         <div class="row">
-          <label class="field">
-            <span>실무 모델 (코딩하는 AI · 구체 모델명)</span>
-            <select id="workerPreset">
-              <optgroup label="Codex (OpenAI)">
-                <option value="codex-sol-xhigh" data-worker="codex" data-cmd='codex -m gpt-5.6-sol -c model_reasoning_effort="xhigh"' selected>Codex · gpt-5.6-sol · xhigh (Solar)</option>
-                <option value="codex-sol-high" data-worker="codex" data-cmd='codex -m gpt-5.6-sol -c model_reasoning_effort="high"'>Codex · gpt-5.6-sol · high (Solar)</option>
-                <option value="codex-56-xhigh" data-worker="codex" data-cmd='codex -m gpt-5.6 -c model_reasoning_effort="xhigh"'>Codex · gpt-5.6 · xhigh</option>
-                <option value="codex-56-high" data-worker="codex" data-cmd='codex -m gpt-5.6 -c model_reasoning_effort="high"'>Codex · gpt-5.6 · high</option>
-                <option value="codex-56-medium" data-worker="codex" data-cmd='codex -m gpt-5.6 -c model_reasoning_effort="medium"'>Codex · gpt-5.6 · medium</option>
-                <option value="codex-55-xhigh" data-worker="codex" data-cmd='codex -m gpt-5.5 -c model_reasoning_effort="xhigh"'>Codex · gpt-5.5 · xhigh</option>
-                <option value="codex-55-high" data-worker="codex" data-cmd='codex -m gpt-5.5 -c model_reasoning_effort="high"'>Codex · gpt-5.5 · high</option>
-                <option value="codex-default" data-worker="codex" data-cmd="codex">Codex · 기본 (CLI 기본 모델)</option>
-              </optgroup>
-              <optgroup label="Claude · 최신 (2026)">
-                <option value="claude-fable-5" data-worker="claude" data-cmd="claude --model claude-fable-5">Claude · claude-fable-5 (Fable 5 · 최고 성능)</option>
-                <option value="claude-sonnet-5" data-worker="claude" data-cmd="claude --model claude-sonnet-5">Claude · claude-sonnet-5 (Sonnet 5 · 기본 추천)</option>
-                <option value="claude-opus-48" data-worker="claude" data-cmd="claude --model claude-opus-4-8">Claude · claude-opus-4-8 (Opus 4.8)</option>
-                <option value="claude-haiku-45-latest" data-worker="claude" data-cmd="claude --model claude-haiku-4-5">Claude · claude-haiku-4-5 (Haiku 4.5 · 빠름)</option>
-              </optgroup>
-              <optgroup label="Claude · 별칭 / 이전 세대">
-                <option value="claude-fable-alias" data-worker="claude" data-cmd="claude --model fable">Claude · fable (별칭)</option>
-                <option value="claude-sonnet-alias" data-worker="claude" data-cmd="claude --model sonnet">Claude · sonnet (별칭 → 보통 최신 Sonnet)</option>
-                <option value="claude-opus-alias" data-worker="claude" data-cmd="claude --model opus">Claude · opus (별칭)</option>
-                <option value="claude-haiku-alias" data-worker="claude" data-cmd="claude --model haiku">Claude · haiku (별칭)</option>
-                <option value="claude-opus-46" data-worker="claude" data-cmd="claude --model claude-opus-4-6">Claude · claude-opus-4-6</option>
-                <option value="claude-opus-45" data-worker="claude" data-cmd="claude --model claude-opus-4-5">Claude · claude-opus-4-5</option>
-                <option value="claude-sonnet-45" data-worker="claude" data-cmd="claude --model claude-sonnet-4-5">Claude · claude-sonnet-4-5</option>
-                <option value="claude-sonnet-40" data-worker="claude" data-cmd="claude --model claude-sonnet-4">Claude · claude-sonnet-4</option>
-                <option value="claude-default" data-worker="claude" data-cmd="claude">Claude · 기본 CLI (설정 기본 모델)</option>
-              </optgroup>
-              <optgroup label="Grok (xAI · Grok CLI)">
-                <option value="grok-45-xhigh" data-worker="grok" data-cmd="grok -m grok-4.5 --reasoning-effort xhigh">Grok · grok-4.5 · xhigh</option>
-                <option value="grok-45-high" data-worker="grok" data-cmd="grok -m grok-4.5 --reasoning-effort high">Grok · grok-4.5 · high</option>
-                <option value="grok-45-medium" data-worker="grok" data-cmd="grok -m grok-4.5 --reasoning-effort medium">Grok · grok-4.5 · medium</option>
-                <option value="grok-45" data-worker="grok" data-cmd="grok -m grok-4.5">Grok · grok-4.5</option>
-                <option value="grok-build-xhigh" data-worker="grok" data-cmd="grok -m grok-build --reasoning-effort xhigh">Grok · grok-build · xhigh</option>
-                <option value="grok-build-high" data-worker="grok" data-cmd="grok -m grok-build --reasoning-effort high">Grok · grok-build · high</option>
-                <option value="grok-build" data-worker="grok" data-cmd="grok -m grok-build">Grok · grok-build</option>
-                <option value="grok-composer-fast" data-worker="grok" data-cmd="grok -m grok-composer-2.5-fast">Grok · grok-composer-2.5-fast</option>
-                <option value="grok-default" data-worker="grok" data-cmd="grok">Grok · 기본 CLI (설정 기본 모델)</option>
-              </optgroup>
-              <optgroup label="OpenCode / 기타">
-                <option value="opencode-default" data-worker="opencode" data-cmd="opencode">OpenCode · 기본</option>
-                <option value="custom" data-worker="custom" data-cmd="">직접 입력 (아래 명령 수정)</option>
-              </optgroup>
-            </select>
-            <span class="hint">모델 ID·effort까지 고르면 실행 명령이 채워집니다. PC에 없는 모델이면 「직접 입력」으로 수정하세요.</span>
+
+          
+          <label class="field" style="grid-column:1/-1">
+            <span>실무 팀 (여러 명 가능 · Codex + Claude + Grok 동시 OK)</span>
+            <span class="hint" style="margin-top:4px">체크한 에이전트마다 <strong>별도 터미널</strong>을 띄워 일을 나눕니다. 최소 1명. 역할: implement=수정 · review=리뷰만 · research/test 등.</span>
           </label>
         </div>
+
+        <div id="workerPool" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+          <!-- Codex -->
+          <div class="box" style="padding:12px 14px" data-agent="codex">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
+                <input type="checkbox" class="w-enable" data-agent="codex" checked /> Codex
+              </label>
+              <select class="w-role" data-agent="codex" style="width:auto;min-width:120px">
+                <option value="implement" selected>implement (수정)</option>
+                <option value="review">review (리뷰만)</option>
+                <option value="research">research</option>
+                <option value="test">test</option>
+              </select>
+              <select class="w-preset" data-agent="codex" style="flex:1;min-width:180px">
+                <option value="codex-sol-xhigh" data-cmd='codex -m gpt-5.6-sol -c model_reasoning_effort="xhigh"' selected>gpt-5.6-sol · xhigh</option>
+                <option value="codex-56-xhigh" data-cmd='codex -m gpt-5.6 -c model_reasoning_effort="xhigh"'>gpt-5.6 · xhigh</option>
+                <option value="codex-56-high" data-cmd='codex -m gpt-5.6 -c model_reasoning_effort="high"'>gpt-5.6 · high</option>
+                <option value="codex-55-xhigh" data-cmd='codex -m gpt-5.5 -c model_reasoning_effort="xhigh"'>gpt-5.5 · xhigh</option>
+                <option value="codex-default" data-cmd="codex">CLI 기본</option>
+                <option value="custom" data-cmd="">직접 입력</option>
+              </select>
+            </div>
+            <input class="w-cmd" data-agent="codex" type="text" value='codex -m gpt-5.6-sol -c model_reasoning_effort="xhigh"' />
+          </div>
+          <!-- Claude -->
+          <div class="box" style="padding:12px 14px" data-agent="claude">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
+                <input type="checkbox" class="w-enable" data-agent="claude" /> Claude
+              </label>
+              <select class="w-role" data-agent="claude" style="width:auto;min-width:120px">
+                <option value="implement">implement (수정)</option>
+                <option value="review" selected>review (리뷰만)</option>
+                <option value="research">research</option>
+                <option value="test">test</option>
+              </select>
+              <select class="w-preset" data-agent="claude" style="flex:1;min-width:180px">
+                <option value="claude-sonnet-5" data-cmd="claude --model claude-sonnet-5" selected>claude-sonnet-5 (추천)</option>
+                <option value="claude-fable-5" data-cmd="claude --model claude-fable-5">claude-fable-5</option>
+                <option value="claude-opus-48" data-cmd="claude --model claude-opus-4-8">claude-opus-4-8</option>
+                <option value="claude-sonnet-alias" data-cmd="claude --model sonnet">sonnet 별칭</option>
+                <option value="claude-opus-alias" data-cmd="claude --model opus">opus 별칭</option>
+                <option value="claude-fable-alias" data-cmd="claude --model fable">fable 별칭</option>
+                <option value="claude-haiku-45" data-cmd="claude --model claude-haiku-4-5">claude-haiku-4-5</option>
+                <option value="claude-default" data-cmd="claude">CLI 기본</option>
+                <option value="custom" data-cmd="">직접 입력</option>
+              </select>
+            </div>
+            <input class="w-cmd" data-agent="claude" type="text" value="claude --model claude-sonnet-5" />
+          </div>
+          <!-- Grok -->
+          <div class="box" style="padding:12px 14px" data-agent="grok">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
+                <input type="checkbox" class="w-enable" data-agent="grok" /> Grok
+              </label>
+              <select class="w-role" data-agent="grok" style="width:auto;min-width:120px">
+                <option value="implement" selected>implement (수정)</option>
+                <option value="review">review (리뷰만)</option>
+                <option value="research">research</option>
+                <option value="test">test</option>
+              </select>
+              <select class="w-preset" data-agent="grok" style="flex:1;min-width:180px">
+                <option value="grok-45-xhigh" data-cmd="grok -m grok-4.5 --reasoning-effort xhigh" selected>grok-4.5 · xhigh</option>
+                <option value="grok-45-high" data-cmd="grok -m grok-4.5 --reasoning-effort high">grok-4.5 · high</option>
+                <option value="grok-build-xhigh" data-cmd="grok -m grok-build --reasoning-effort xhigh">grok-build · xhigh</option>
+                <option value="grok-default" data-cmd="grok">CLI 기본</option>
+                <option value="custom" data-cmd="">직접 입력</option>
+              </select>
+            </div>
+            <input class="w-cmd" data-agent="grok" type="text" value="grok -m grok-4.5 --reasoning-effort xhigh" />
+          </div>
+        </div>
+
         <div class="row">
           <label class="field">
-            <span>실무 AI 실행 명령 (자동 채움 · 수정 가능)</span>
-            <input id="workerCmd" type="text" value='codex -m gpt-5.6-sol -c model_reasoning_effort="xhigh"' />
-            <span class="hint">터미널 create --command 에 그대로 들어감 = 모델 지정 위치</span>
-          </label>
-          <label class="field">
-            <span>한 번에 돌릴 실무 수</span>
+            <span>한 번에 돌릴 실무 수 (동시)</span>
             <input id="maxWorkers" type="number" min="1" max="6" value="3" />
-          </label>
-        </div>
-        <div class="row">
-          <label class="field">
-            <span>리뷰 워커 명령 (선택 · 비우면 없음)</span>
-            <input id="reviewCmd" type="text" value="" placeholder='예: claude --model sonnet' />
-            <span class="hint">두 번째 역할. review-only · 수정 권한 없음이 기본</span>
+            <span class="hint">체크한 팀 중 동시에 최대 몇 명까지 돌릴지</span>
           </label>
           <label class="field">
             <span>CLI로 같은 팩 생성 (복사용)</span>
@@ -497,6 +517,13 @@
             <span class="hint">터미널에 붙여 generate-pack.sh 실행</span>
           </label>
         </div>
+        <div class="row" style="display:none" aria-hidden="true">
+          <!-- legacy hidden fields for any leftover refs -->
+          <input id="workerPreset" type="hidden" value="multi" />
+          <input id="workerCmd" type="hidden" value="" />
+          <input id="reviewCmd" type="hidden" value="" />
+        </div>
+
         <div class="row">
           <label class="field">
             <span>작업 폴더 기본값</span>
@@ -688,39 +715,77 @@ cat ~/.orca/MODE-PACK-INSTALLED.md</pre>
       auto: "상황에 맞게 자동",
     };
 
-    const FIELD_IDS = ["modeName","displayName","coordination","coord","workerPreset","workerCmd","reviewCmd","maxWorkers","wtPolicy","triggers","finalSections"];
+    const FIELD_IDS = ["modeName","displayName","coordination","coord","maxWorkers","wtPolicy","triggers","finalSections"];
 
-    function selectedWorkerOption() {
-      const sel = $("workerPreset");
-      return sel.options[sel.selectedIndex];
+    
+    function collectWorkers() {
+      const agents = ["codex", "claude", "grok"];
+      const out = [];
+      agents.forEach((agent) => {
+        const en = document.querySelector(`.w-enable[data-agent="${agent}"]`);
+        if (!en || !en.checked) return;
+        const roleEl = document.querySelector(`.w-role[data-agent="${agent}"]`);
+        const cmdEl = document.querySelector(`.w-cmd[data-agent="${agent}"]`);
+        const role = (roleEl && roleEl.value) || "implement";
+        const command = (cmdEl && cmdEl.value.trim()) || agent;
+        out.push({
+          role,
+          agent,
+          command,
+          ownership: role === "review" ? "review-only" : "edit",
+          label: (labels[agent] || agent) + " · " + role,
+        });
+      });
+      return out;
     }
 
-    function workerMeta() {
-      const opt = selectedWorkerOption();
-      const worker = (opt && opt.dataset.worker) || "custom";
-      const label = (opt && opt.textContent.trim()) || labels[worker] || "Custom";
-      return { worker, workerLabel: label };
+    function wireWorkerPool() {
+      document.querySelectorAll(".w-preset").forEach((sel) => {
+        sel.addEventListener("change", () => {
+          const agent = sel.dataset.agent;
+          const opt = sel.options[sel.selectedIndex];
+          if (opt && opt.value !== "custom" && opt.dataset.cmd) {
+            const cmd = document.querySelector(`.w-cmd[data-agent="${agent}"]`);
+            if (cmd) cmd.value = opt.dataset.cmd;
+          }
+          refresh();
+        });
+      });
+      document.querySelectorAll(".w-enable, .w-role, .w-cmd").forEach((el) => {
+        el.addEventListener("change", refresh);
+        el.addEventListener("input", refresh);
+      });
     }
 
-    function applyPresetToCmd() {
-      const opt = selectedWorkerOption();
-      if (!opt) return;
-      if (opt.value === "custom") return; // keep user text
-      const cmd = opt.dataset.cmd || "";
-      if (cmd) $("workerCmd").value = cmd;
+    function workerSummary(workers) {
+      if (!workers.length) return "실무 없음";
+      return workers.map((w) => (labels[w.agent] || w.agent) + "/" + w.role).join(" + ");
+    }
+
+    function primaryWorker(workers) {
+      return workers.find((w) => w.role === "implement") || workers[0] || {
+        agent: "codex",
+        command: "codex",
+        role: "implement",
+        ownership: "edit",
+        label: "Codex",
+      };
     }
 
     function vals() {
-      const meta = workerMeta();
+      const workers = collectWorkers();
+      const primary = primaryWorker(workers);
+      const review = workers.find((w) => w.role === "review");
       return {
         modeName: ($("modeName").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-")) || "my-mode",
         displayName: $("displayName").value.trim() || "MyMode",
         coordination: ($("coordination") && $("coordination").value) || "supervised",
         coord: $("coord").value,
-        worker: meta.worker,
-        workerLabel: meta.workerLabel,
-        workerCmd: $("workerCmd").value.trim() || "claude",
-        reviewCmd: ($("reviewCmd") && $("reviewCmd").value.trim()) || "",
+        workers,
+        worker: primary.agent,
+        workerLabel: workerSummary(workers),
+        workerCmd: primary.command,
+        reviewCmd: review ? review.command : "",
         maxWorkers: Math.min(6, Math.max(1, Number($("maxWorkers").value) || 3)),
         wtPolicy: $("wtPolicy").value,
         triggers: $("triggers").value.trim() || "orchestrate",
@@ -729,53 +794,51 @@ cat ~/.orca/MODE-PACK-INSTALLED.md</pre>
     }
 
     function buildCliHint(v) {
-      let s = `bash "$HOME/.orca/jinjing/studio/generate-pack.sh" --name ${v.modeName} --display "${v.displayName}" --coord ${v.coord} --worker ${v.worker} --worker-cmd '${v.workerCmd.replace(/'/g, `'\\''`)}' --max ${v.maxWorkers} --wt ${v.wtPolicy} --coordination ${v.coordination} --triggers '${v.triggers}'`;
-      if (v.reviewCmd) s += ` --review-cmd '${v.reviewCmd.replace(/'/g, `'\\''`)}'`;
+      let s = `bash "$HOME/.orca/studio/generate-pack.sh" --name ${v.modeName} --display "${v.displayName}" --coord ${v.coord} --max ${v.maxWorkers} --wt ${v.wtPolicy} --coordination ${v.coordination} --triggers '${v.triggers}'`;
+      v.workers.forEach((w) => {
+        const cmd = w.command.replace(/'/g, `'\\''`);
+        s += ` --worker-entry 'role=${w.role}|agent=${w.agent}|cmd=${cmd}'`;
+      });
       return s;
     }
 
     function escCmd(cmd) {
+
       return cmd.replace(/'/g, `'\\''`);
     }
 
     function wtBlock(v) {
-      const c = escCmd(v.workerCmd);
-      if (v.wtPolicy === "active") {
-        return `**기본: 지금 폴더에서 실무 AI 실행**
-
-\`\`\`bash
-orca terminal create --worktree active --title "<short>" \\
-  --command '${c}' --json
+      const list = (v.workers && v.workers.length)
+        ? v.workers
+        : [{ agent: "worker", role: "implement", command: v.workerCmd }];
+      const examples = list.map((w) =>
+        `orca terminal create --worktree active --title "${w.agent}-${w.role}" \\
+  --command '${escCmd(w.command)}' --json
 orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
-\`\`\``;
-      }
-      if (v.wtPolicy === "isolated") {
-        return `**기본: 새 worktree에서 독립 실행**
+orca orchestration dispatch --task <task_id> --to <handle> --inject --json`
+      ).join("\n\n");
+      const policy =
+        v.wtPolicy === "isolated"
+          ? "**기본: 새 worktree** (`--no-parent`) 후 아래처럼 에이전트별 터미널"
+          : v.wtPolicy === "auto"
+            ? "**자동**: 독립 작업 → 새 worktree / 미커밋·현재 브랜치 → `--worktree active`"
+            : "**기본: 지금 폴더**에서 실무 AI를 **에이전트마다** 실행";
+      return `${policy}
+
+실무 팀 (${list.length}명): ${list.map((w) => w.agent + "/" + w.role).join(", ")}
 
 \`\`\`bash
-orca worktree create --name "deep-<short>" --no-parent --json
-orca terminal create --worktree id:<FULL_WORKTREE_ID> --title "<short>" \\
-  --command '${c}' --json
-orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
-\`\`\``;
-      }
-      return `**자동**: 독립 작업 → 새 worktree(\`--no-parent\`). 지금 브랜치·미커밋 필요 → \`--worktree active\`.
-
-예시(지금 폴더):
-\`\`\`bash
-orca terminal create --worktree active --title "<short>" \\
-  --command '${c}' --json
+${examples}
 \`\`\``;
     }
 
     function buildQuick(v) {
       const overlay = `.orca/${v.modeName}.md`;
-      const wName = v.workerLabel || labels[v.worker] || v.worker;
-      const reviewBit = v.reviewCmd ? ` Review worker: ${v.reviewCmd}.` : "";
+      const team = (v.workers || []).map((w) => `${w.agent}/${w.role}:{${w.command}}`).join(" ; ") || v.workerCmd;
       const coordBit = v.coordination === "handoff"
         ? "Coordination=handoff: do NOT inject lifecycle; use terminal/worktree prompt and stop monitoring."
         : "Coordination=supervised: task-create + dispatch --inject → check --wait for worker_done. Never full handoff.";
-      return `${v.displayName} mode (user-created). Read and follow $HOME/.orca/${v.modeName}/PLAYBOOK.md and the orchestration skill. If this project has ${overlay} or .orca/PLAYBOOK.md, also follow it as project overlay. You are ${labels[v.coord]} coordinator: decompose → dispatch workers (${wName}). ${coordBit} Max concurrent workers: ${v.maxWorkers}. Implement worker command: ${v.workerCmd}.${reviewBit} Goal:`;
+      return `${v.displayName} mode (user-created). Read and follow $HOME/.orca/${v.modeName}/PLAYBOOK.md and the orchestration skill. If this project has ${overlay} or .orca/PLAYBOOK.md, also follow it as project overlay. You are ${labels[v.coord]} coordinator: decompose → dispatch a multi-agent worker pool (${v.workerLabel || team}). ${coordBit} Max concurrent: ${v.maxWorkers}. Workers: ${team}. Goal:`;
     }
 
     function buildPlaybook(v) {
@@ -818,9 +881,9 @@ Orca 설정 → Experimental → Orchestration 이 켜져 있어야 합니다.
 | 역할 | 에이전트 | 할 일 |
 |------|----------|--------|
 | **팀장** | ${labels[v.coord]} | 일 쪼개기, 배정, 대기, FINAL 정리 |
-| **실무(implement)** | ${wName}<br/>\`${v.workerCmd}\` | 맡은 일 수행 후 \`worker_done\` 1회 |
-${v.reviewCmd ? `| **리뷰(review)** | \`${v.reviewCmd}\` | findings only · 수정 권한 없음 |` : ""}
+${(v.workers || []).map((w) => `| **실무 (${w.role})** | ${labels[w.agent] || w.agent}<br/>\`${w.command}\` | ${w.ownership === "review-only" ? "findings only" : "작업 후 worker_done 1회"} |`).join("\n") || `| **실무** | \`${v.workerCmd}\` | worker_done |`}
 
+**실무는 여러 명 가능** (Codex + Claude + Grok 동시). 각 역할마다 별도 터미널·dispatch.
 **모델 규칙:** 모델은 worker \`command\` 에만 넣습니다. \`dispatch\` 에 \`--model\` 없음.
 **조율 유형:** ${v.coordination}
 
@@ -887,9 +950,8 @@ inject 안내가 있으면: 일 수행 → 팀장 핸들로 \`worker_done\` **�
 | 폴더 | \`$HOME/.orca/${v.modeName}/\` |
 | 팀장 | ${labels[v.coord]} |
 | 조율 유형 | ${v.coordination} |
-| 실무 모델 | ${v.workerLabel || labels[v.worker]} |
-| 실무 명령 | \`${v.workerCmd}\` |
-| 리뷰 명령 | ${v.reviewCmd ? `\`${v.reviewCmd}\`` : "—"} |
+| 실무 팀 | ${v.workerLabel || labels[v.worker]} |
+| 실무 목록 | ${(v.workers||[]).map(w=>`**${w.agent}/${w.role}**: \`${w.command}\``).join("<br/>") || v.workerCmd} |
 | 동시 | ${v.maxWorkers}명 |
 | 폴더 정책 | ${wtLabels[v.wtPolicy] || v.wtPolicy} |
 
@@ -1092,14 +1154,17 @@ ${play}
       $("flow-cmd").textContent = v.workerCmd;
       $("flow-max").textContent = String(v.maxWorkers);
       $("flow-wt").textContent = wtLabels[v.wtPolicy] || v.wtPolicy;
+      const spawnLines = (v.workers && v.workers.length ? v.workers : [{agent:"worker", command:v.workerCmd, role:"implement"}])
+        .map((w, i) => `# ${w.agent} (${w.role})
+orca terminal create --worktree active --title "${w.agent}-${w.role}" \\
+  --command '${escCmd(w.command)}' --json
+orca terminal wait --terminal <handle_${i}> --for tui-idle --timeout-ms 60000 --json
+orca orchestration task-create --spec "[${w.role}/${w.agent}] 할 일" --json
+orca orchestration dispatch --task <task_id_${i}> --to <handle_${i}> --inject --json`).join("\n\n");
       $("flowCmdBlock").textContent =
-`# 실무 창 예시 (${v.displayName})
-orca terminal create --worktree active --title "worker-1" \\
-  --command '${escCmd(v.workerCmd)}' --json
-orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+`# 멀티 실무 예시 (${v.displayName}) — 동시에 여러 에이전트
+${spawnLines}
 
-orca orchestration task-create --spec "할 일 설명" --json
-orca orchestration dispatch --task <task_id> --to <handle> --inject --json
 orca orchestration check --wait --types worker_done,escalation,decision_gate --timeout-ms 900000 --json`;
 
       // 미리보기
@@ -1137,12 +1202,8 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
     });
 
     function shortWorkerLabel(v) {
-      // 상단 바용 짧은 이름 (예: gpt-5.6-sol xhigh)
-      const t = v.workerLabel || "";
-      const m = t.match(/gpt-[\w.-]+[^·]*/);
-      if (m) return m[0].replace(/\s+/g, " ").trim();
-      if (t.includes("·")) return t.split("·").slice(1).join("·").trim() || t;
-      return labels[v.worker] || t || v.worker;
+      if (v.workers && v.workers.length) return workerSummary(v.workers);
+      return v.workerLabel || labels[v.worker] || v.worker || "실무";
     }
 
     FIELD_IDS.forEach((id) => {
@@ -1152,22 +1213,7 @@ orca orchestration check --wait --types worker_done,escalation,decision_gate --t
       el.addEventListener("change", refresh);
     });
 
-    $("workerPreset").addEventListener("change", () => {
-      applyPresetToCmd();
-      refresh();
-    });
-
-    $("workerCmd").addEventListener("input", () => {
-      // 명령 수동 수정 시 프리셋을 직접 입력으로 맞춤(선택)
-      const optCustom = Array.from($("workerPreset").options).find((o) => o.value === "custom");
-      if (optCustom) {
-        const opt = selectedWorkerOption();
-        if (opt && opt.dataset.cmd && opt.dataset.cmd !== $("workerCmd").value) {
-          $("workerPreset").value = "custom";
-        }
-      }
-      refresh();
-    });
+    wireWorkerPool();
 
     $("btnCopyQuick").onclick = () => copyText($("outQuick").value);
     $("btnCopyPlaybook").onclick = () => copyText($("outPlaybook").value);
@@ -1240,7 +1286,7 @@ ${INSTALL_ONE}
       toast(`${v.displayName} 팩 다운로드`);
     };
 
-    applyPresetToCmd();
+    wireWorkerPool();
     refresh();
   </script>
 </body>

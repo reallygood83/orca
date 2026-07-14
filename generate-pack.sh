@@ -22,6 +22,7 @@ COORD="grok"
 WORKER="codex"
 WORKER_CMD='codex -m gpt-5.6 -c model_reasoning_effort="xhigh"'
 REVIEW_CMD=""
+WORKER_ENTRIES=()
 MAX=3
 WT="auto"
 TRIGGERS="orchestrate, 조율"
@@ -37,8 +38,9 @@ while [[ $# -gt 0 ]]; do
     --display) DISPLAY="$2"; shift 2 ;;
     --coord) COORD="$2"; shift 2 ;;
     --worker) WORKER="$2"; shift 2 ;;
-    --worker-cmd) WORKER_CMD="$2"; shift 2 ;;
-    --review-cmd) REVIEW_CMD="$2"; shift 2 ;;
+    --worker-cmd) WORKER_CMD="$2"; WORKER_ENTRIES+=("role=implement|agent=${WORKER:-codex}|cmd=$2"); shift 2 ;;
+    --review-cmd) REVIEW_CMD="$2"; WORKER_ENTRIES+=("role=review|agent=claude|cmd=$2"); shift 2 ;;
+    --worker-entry) WORKER_ENTRIES+=("$2"); shift 2 ;;
     --max) MAX="$2"; shift 2 ;;
     --wt) WT="$2"; shift 2 ;;
     --triggers) TRIGGERS="$2"; shift 2 ;;
@@ -113,6 +115,9 @@ export GEN_COORD="$COORD" GEN_WORKER="$WORKER"
 export GEN_COORDINATION="$COORDINATION" GEN_WAIT_MS="$WAIT_MS"
 export GEN_PROJECT_RULES="$PROJECT_RULES"
 
+export GEN_WORKER_ENTRIES="$(printf '%s\n' "${WORKER_ENTRIES[@]}")"
+
+
 python3 <<'PY'
 import json, os, re
 from pathlib import Path
@@ -136,23 +141,57 @@ wait_ms = int(os.environ.get("GEN_WAIT_MS", "900000"))
 project_rules = os.environ.get("GEN_PROJECT_RULES", "").strip()
 wt = os.environ["GEN_WT"]
 
+workers = []
+for e in os.environ.get("GEN_WORKER_ENTRIES", "").splitlines():
+    e = e.strip()
+    if not e:
+        continue
+    d = {"role": "implement", "agent": worker or "codex", "command": worker_cmd, "ownership": "edit"}
+    for part in e.split("|"):
+        if "=" not in part:
+            continue
+        k, v = part.split("=", 1)
+        if k == "role":
+            d["role"] = v
+        elif k == "agent":
+            d["agent"] = v
+        elif k == "cmd":
+            d["command"] = v
+    d["ownership"] = "review-only" if d["role"] == "review" else "edit"
+    workers.append(d)
+if not workers:
+    workers = [{"role": "implement", "agent": worker or "codex", "command": worker_cmd, "ownership": "edit"}]
+    if review_cmd:
+        workers.append({"role": "review", "agent": "claude", "command": review_cmd, "ownership": "review-only"})
+
+_impl = next((w for w in workers if w["role"] == "implement"), workers[0])
+worker_cmd = _impl["command"]
+worker = _impl["agent"]
+worker_l = ", ".join(f'{w["agent"]}/{w["role"]}' for w in workers)
+_rev = next((w for w in workers if w["role"] == "review"), None)
+review_cmd = _rev["command"] if _rev else ""
+
 trig_list = [t.strip() for t in triggers_raw.split(",") if t.strip()]
 trig_fmt = ", ".join(f"`{t}`" for t in trig_list) or f"`{display}`"
 
-review_section = ""
-if review_cmd:
-    review_section = f"""
-### Review worker (optional second role)
-
+spawn_lines = []
+for i, w in enumerate(workers):
+    spawn_lines.append(
+        f"""# {w['agent']} ({w['role']})
 ```bash
-orca terminal create --worktree active --title "review-<short>" \\
-  --command '{review_cmd}' --json
-orca terminal wait --terminal <review_handle> --for tui-idle --timeout-ms 60000 --json
-orca orchestration dispatch --task <review_task_id> --to <review_handle> --inject --json
-```
-
-Review `worker_done` is **findings only** unless the task spec grants edit ownership.
-"""
+orca terminal create --worktree active --title "{w['agent']}-{w['role']}" \\
+  --command '{w['command']}' --json
+orca terminal wait --terminal <handle_{i}> --for tui-idle --timeout-ms 60000 --json
+orca orchestration task-create --spec "[{w['role']}/{w['agent']}] <task>" --json
+orca orchestration dispatch --task <task_id_{i}> --to <handle_{i}> --inject --json
+```"""
+    )
+review_section = "\n\n".join(spawn_lines)
+role_rows = "\n".join(
+    f"| **Worker ({w['role']})** | `{w['command']}` | "
+    f"{'findings only' if w['ownership']=='review-only' else 'deep work + worker_done'} |"
+    for w in workers
+)
 
 handoff_note = ""
 if coordination == "handoff":
@@ -172,7 +211,8 @@ if project_rules:
 
 playbook = f"""# {display} Orchestration Mode (Orca) — Global
 
-{coord_l} is the **coordinator**. {worker_l} is the **primary deep worker**.
+{coord_l} is the **coordinator**. Worker pool: **{worker_l}**.
+You may run **multiple worker agents at once** (Codex + Claude + Grok, etc.).
 Everything reports back to the coordinator for the **final synthesis**.
 
 {handoff_note}
@@ -199,7 +239,6 @@ Then follow this file strictly.
 orca status --json
 orca orchestration task-list --json
 command -v {coord} || true
-command -v {worker} || true
 ```
 
 Orca → Settings → Experimental → Orchestration: ON
@@ -208,12 +247,12 @@ Orca → Settings → Experimental → Orchestration: ON
 
 ## Role split
 
-| Role | Agent | Job |
-|------|--------|-----|
+| Role | Agent / command | Job |
+|------|-----------------|-----|
 | **Coordinator** | {coord_l} | Decompose, dispatch, wait, synthesize FINAL |
-| **Worker (implement)** | `{worker_cmd}` | Deep work; one `worker_done` |
-{"| **Worker (review)** | `" + review_cmd + "` | Review-only findings |" if review_cmd else ""}
+{role_rows}
 
+**Multi-worker:** each row = its own terminal + `dispatch --inject`.  
 **Model rule:** models live only in worker `command` strings. Never pass `--model` to `dispatch`.
 
 ---
@@ -221,17 +260,16 @@ Orca → Settings → Experimental → Orchestration: ON
 ## Coordinator loop
 
 ### 1) Decompose
-2–6 self-contained tasks. Max **{max_w}** concurrent deep workers.
-Put ownership and paths in each `--spec`.
+2–6 self-contained tasks. Assign tasks to the best worker role (implement/review/research).
+Max **{max_w}** concurrent deep workers.
 
 ### 2) Create tasks
 ```bash
-orca orchestration task-create --spec "<self-contained task>" --json
+orca orchestration task-create --spec "[role/agent] <self-contained task>" --json
 # deps: --deps '["<id>"]'
 ```
 
-### 3) Spawn workers
-{wt_block}
+### 3) Spawn workers (one terminal per agent)
 {review_section}
 
 ### 4) Dispatch
@@ -265,15 +303,15 @@ Global rules win for mechanics; project rules win for domain/safety.
 {project_block}
 """
 
+_team = " ; ".join(f"{w['agent']}/{w['role']}:{{{w['command']}}}" for w in workers)
 quick = (
     f"{display} mode (user pack). Read and follow $HOME/.orca/{name}/PLAYBOOK.md and the orchestration skill. "
     f"If this repo has .orca/{name}.md or .orca/PLAYBOOK.md, also follow as overlay. "
-    f"You are {coord_l} coordinator: decompose → dispatch workers via orca orchestration "
+    f"You are {coord_l} coordinator: decompose → dispatch a multi-agent worker pool via orca orchestration "
     f"task-create + dispatch --inject → check --wait for worker_done → synthesize FINAL. "
     f"Coordination={coordination}. Max concurrent: {max_w}. "
-    f"Implement worker command: {worker_cmd}."
-    + (f" Review worker command: {review_cmd}." if review_cmd else "")
-    + " Goal:"
+    f"Workers: {_team}. "
+    f"Goal:"
 )
 
 coord_start = f"""# {display} — coordinator start
@@ -354,23 +392,7 @@ bash "$HOME/.orca/jinjing/studio/generate-pack.sh" \\
 ```
 """
 
-workers_meta = [
-    {
-        "role": "implement",
-        "agent": worker,
-        "command": worker_cmd,
-        "ownership": "edit",
-    }
-]
-if review_cmd:
-    workers_meta.append(
-        {
-            "role": "review",
-            "agent": "claude" if "claude" in review_cmd else "custom",
-            "command": review_cmd,
-            "ownership": "review-only",
-        }
-    )
+workers_meta = workers
 
 meta = {
     "name": name,
