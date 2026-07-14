@@ -449,11 +449,15 @@
               <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
                 <input type="checkbox" class="w-enable" data-agent="codex" checked /> Codex
               </label>
-              <select class="w-role" data-agent="codex" style="width:auto;min-width:130px">
-                <option value="implement" selected>implement</option>
-                <option value="review">review</option>
-                <option value="research">research</option>
-                <option value="test">test</option>
+              <select class="w-role" data-agent="codex" style="width:auto;min-width:160px">
+                <option value="implement" selected>implement · 코딩</option>
+                <option value="design">design · UI/UX</option>
+                <option value="backend-design">backend-design · API/스키마</option>
+                <option value="fullstack">fullstack · E2E</option>
+                <option value="review">review · 리뷰만</option>
+                <option value="research">research · 조사</option>
+                <option value="test">test · 테스트</option>
+                <option value="docs">docs · 문서</option>
               </select>
               <select class="w-preset" data-agent="codex" style="flex:1;min-width:180px">
                 <option value="codex-sol-xhigh" data-cmd='codex -m gpt-5.6-sol -c model_reasoning_effort="xhigh"' selected>gpt-5.6-sol · xhigh</option>
@@ -472,11 +476,15 @@
               <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
                 <input type="checkbox" class="w-enable" data-agent="claude" /> Claude
               </label>
-              <select class="w-role" data-agent="claude" style="width:auto;min-width:130px">
-                <option value="implement">implement</option>
-                <option value="review" selected>review</option>
-                <option value="research">research</option>
-                <option value="test">test</option>
+              <select class="w-role" data-agent="claude" style="width:auto;min-width:160px">
+                <option value="implement">implement · 코딩</option>
+                <option value="design" selected>design · UI/UX</option>
+                <option value="backend-design">backend-design · API/스키마</option>
+                <option value="fullstack">fullstack · E2E</option>
+                <option value="review">review · 리뷰만</option>
+                <option value="research">research · 조사</option>
+                <option value="test">test · 테스트</option>
+                <option value="docs">docs · 문서</option>
               </select>
               <select class="w-preset" data-agent="claude" style="flex:1;min-width:180px">
                 <option value="claude-sonnet-5" data-cmd="claude --model claude-sonnet-5" selected>claude-sonnet-5</option>
@@ -497,11 +505,15 @@
               <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
                 <input type="checkbox" class="w-enable" data-agent="grok" /> Grok
               </label>
-              <select class="w-role" data-agent="grok" style="width:auto;min-width:130px">
-                <option value="implement" selected>implement</option>
-                <option value="review">review</option>
-                <option value="research">research</option>
-                <option value="test">test</option>
+              <select class="w-role" data-agent="grok" style="width:auto;min-width:160px">
+                <option value="implement">implement · 코딩</option>
+                <option value="design">design · UI/UX</option>
+                <option value="backend-design" selected>backend-design · API/스키마</option>
+                <option value="fullstack">fullstack · E2E</option>
+                <option value="review">review · 리뷰만</option>
+                <option value="research">research · 조사</option>
+                <option value="test">test · 테스트</option>
+                <option value="docs">docs · 문서</option>
               </select>
               <select class="w-preset" data-agent="grok" style="flex:1;min-width:180px">
                 <option value="grok-45-xhigh" data-cmd="grok -m grok-4.5 --reasoning-effort xhigh" selected>grok-4.5 · xhigh</option>
@@ -693,7 +705,61 @@ const $ = (id) => document.getElementById(id);
 
     const FIELD_IDS = ["modeName","displayName","coordination","coord","maxWorkers","wtPolicy","triggers","finalSections"];
 
-    
+    const ROLE_META = {
+      implement: {
+        title: "구현 · 코딩",
+        duty: "코드 작성·수정, 가능하면 테스트 후 worker_done",
+        deliverables: "코드, 테스트 결과, filesModified",
+        constraints: "범위 밖 리팩터 최소화 · 시크릿 금지",
+      },
+      design: {
+        title: "디자인 · UI/UX",
+        duty: "화면/플로우/컴포넌트·토큰 설계. 시각 계층·접근성·반응형 원칙 문서화. 구현보다 스펙 우선",
+        deliverables: "와이어/레이아웃 스펙, 컬러·타이포·컴포넌트 목록, 상태(빈/로딩/에러), reportPath",
+        constraints: "대규모 프로덕션 코드는 명시 요청 시에만 · 브랜드/접근성 존중",
+      },
+      "backend-design": {
+        title: "백엔드 설계 · API/스키마",
+        duty: "API 계약, 데이터 모델, 인증/권한, 서비스 경계, 시퀀스·에러 모델 설계. 구현보다 설계 산출 우선",
+        deliverables: "엔드포인트 표/OpenAPI 초안, 스키마, 인증 흐름, 트레이드오프, reportPath",
+        constraints: "합의 전 대규모 구현 금지 · 기존 스키마 충돌 시 ask",
+      },
+      fullstack: {
+        title: "풀스택 구현",
+        duty: "프론트+백엔드 E2E 기능 구현. API 계약과 UI를 맞춤",
+        deliverables: "E2E 동작, API+UI 변경, 테스트, filesModified",
+        constraints: "계약 변경 시 문서/클라이언트 동시 갱신",
+      },
+      review: {
+        title: "리뷰 전용",
+        duty: "findings만 보고. 수정 패치 적용 권한 없음",
+        deliverables: "심각도별 findings, 재현 경로, 권장 조치",
+        constraints: "파일 수정 금지(명시 제외)",
+      },
+      research: {
+        title: "조사 · 리서치",
+        duty: "옵션 비교, 근거 수집, 권고안 정리",
+        deliverables: "조사 요약, 출처, 추천안, reportPath",
+        constraints: "불필요한 코드 변경 금지",
+      },
+      test: {
+        title: "테스트",
+        duty: "테스트 작성·실행, 실패 분석, 커버리지 갭 보고",
+        deliverables: "테스트 결과, 실패 로그 요약, filesModified",
+        constraints: "프로덕션 로직 무단 변경 금지",
+      },
+      docs: {
+        title: "문서 · 스펙",
+        duty: "README/설계 노트/가이드 작성",
+        deliverables: "문서 경로, 목차, 변경 요약",
+        constraints: "불필요한 코드 리팩터 금지",
+      },
+    };
+
+    function roleMeta(role) {
+      return ROLE_META[role] || ROLE_META.implement;
+    }
+
     function collectWorkers() {
       const agents = ["codex", "claude", "grok"];
       const out = [];
@@ -704,12 +770,17 @@ const $ = (id) => document.getElementById(id);
         const cmdEl = document.querySelector(`.w-cmd[data-agent="${agent}"]`);
         const role = (roleEl && roleEl.value) || "implement";
         const command = (cmdEl && cmdEl.value.trim()) || agent;
+        const meta = roleMeta(role);
         out.push({
           role,
           agent,
           command,
           ownership: role === "review" ? "review-only" : "edit",
           label: (labels[agent] || agent) + " · " + role,
+          roleTitle: meta.title,
+          duty: meta.duty,
+          deliverables: meta.deliverables,
+          constraints: meta.constraints,
         });
       });
       return out;
@@ -856,23 +927,35 @@ Orca 설정 → Experimental → Orchestration 이 켜져 있어야 합니다.
 
 | 역할 | 에이전트 | 할 일 |
 |------|----------|--------|
-| **팀장** | ${labels[v.coord]} | 일 쪼개기, 배정, 대기, FINAL 정리 |
-${(v.workers || []).map((w) => `| **실무 (${w.role})** | ${labels[w.agent] || w.agent}<br/>\`${w.command}\` | ${w.ownership === "review-only" ? "findings only" : "작업 후 worker_done 1회"} |`).join("\n") || `| **실무** | \`${v.workerCmd}\` | worker_done |`}
+| **팀장** | ${labels[v.coord]} | 역할별 일 쪼개기, 배정, 대기, FINAL 정리 |
+${(v.workers || []).map((w) => {
+  const m = roleMeta(w.role);
+  return `| **${m.title} (\`${w.role}\`)** | ${labels[w.agent] || w.agent}<br/>\`${w.command}\`<br/>ownership: ${w.ownership} | ${m.duty}<br/>**산출:** ${m.deliverables}<br/>**제약:** ${m.constraints} |`;
+}).join("\n") || `| **실무** | \`${v.workerCmd}\` | worker_done |`}
 
-**실무는 여러 명 가능** (Codex + Claude + Grok 동시). 각 역할마다 별도 터미널·dispatch.
+**실무는 여러 명 가능** (예: Codex=implement + Claude=design + Grok=backend-design). 각 역할마다 별도 터미널·dispatch.
 **모델 규칙:** 모델은 worker \`command\` 에만 넣습니다. \`dispatch\` 에 \`--model\` 없음.
 **조율 유형:** ${v.coordination}
+
+### 역할 키 안내
+- \`implement\` — 코딩 구현
+- \`design\` — UI/UX·화면·컴포넌트 설계
+- \`backend-design\` — API·스키마·서비스 경계 설계
+- \`fullstack\` — E2E 구현
+- \`review\` — 리뷰 전용(수정 없음)
+- \`research\` / \`test\` / \`docs\` — 조사·테스트·문서
 
 ---
 
 ## 팀장 루프
 
 ### 1) 일 쪼개기
-2~6개. 가능하면 서로 독립. 동시에 최대 **${v.maxWorkers}** 명.
+2~6개. **워커 역할에 맞게** 스펙을 쓴다.
+${(v.workers||[]).some(w=>w.role==="design") ? "- design 태스크: 화면/플로우/컴포넌트 단위\n" : ""}${(v.workers||[]).some(w=>w.role==="backend-design") ? "- backend-design 태스크: API·스키마·인증 경계 단위\n" : ""}가능하면 서로 독립. 동시에 최대 **${v.maxWorkers}** 명.
 
 ### 2) 일 등록
 \`\`\`bash
-orca orchestration task-create --spec "<할 일을 스스로 이해할 수 있게 자세히>" --json
+orca orchestration task-create --spec "[role=<implement|design|backend-design|…>] <할 일 상세>" --json
 \`\`\`
 
 ### 3) 실무 창 띄우기
@@ -894,12 +977,18 @@ orca orchestration check --wait \\
 
 ### 6) FINAL 정리
 포함할 항목: ${v.finalSections}.
+역할별 산출물(디자인 스펙 / API 계약 / 코드 변경)을 구분해 요약.
 
 ---
 
-## 실무 의무
-inject 안내가 있으면: 일 수행 → 팀장 핸들로 \`worker_done\` **딱 1번**
-(taskId, dispatchId, filesModified, 필요 시 reportPath) → 대기.
+## 실무 의무 (역할 공통)
+inject 안내가 있으면: **맡은 role 범위 안**에서 일 수행 → 팀장 핸들로 \`worker_done\` **딱 1번**
+(taskId, dispatchId, role, filesModified 또는 reportPath) → 대기.
+
+payload 예:
+\`\`\`json
+{"taskId":"…","dispatchId":"…","role":"design|backend-design|implement","filesModified":[],"reportPath":"optional"}
+\`\`\`
 
 ---
 
