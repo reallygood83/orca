@@ -1,100 +1,80 @@
-# Orca 조율 스튜디오
+# Orca Mode Studio
 
-**공개 사이트 (여기로 배포·공유):** https://orca-lime.vercel.app  
+**Product URL:** https://orca-lime.vercel.app  
 
-누구나 **자기만의 Orca 조율 모드**를 만들고, **자기 컴퓨터**에 설치하는 정적 웹 + CLI 도구입니다.
+A **local-first, multi-agent orchestration mode designer** for [Orca](https://orca.com)-compatible workflows.
 
-> 자세한 배포·사용 안내: **[사용방법.md](./사용방법.md)**
+Anyone can:
 
-## 배포 한 줄 요약
+1. Define a **coordinator** + **worker pool** (Codex, Claude, Grok, … — multiple at once)
+2. Export a **Playbook** + **Quick Command**
+3. Optionally install the **agent skill** (`orca-mode-pack`) in one command
+4. Run supervised orchestration on their own machine
 
-| 역할 | 할 일 |
-|------|--------|
-| **당신 (운영자)** | **https://orca-lime.vercel.app** 링크 공유 |
-| **사용자 · 웹** | 탭 3–4로 모드 만들고 Quick Command 등록 |
-| **사용자 · 스킬** | 터미널 한 줄로 `orca-mode-pack` 설치 (아래) |
-| **설정 저장** | **사용자 PC** only. 서버에 안 쌓임 |
+No cloud account is required for mode design. Mode configuration is stored **on the user’s device** (`~/.orca/…`).
 
-### 사용자 원클릭 (스킬)
+## Product principles
 
+| Principle | Meaning |
+|-----------|---------|
+| Universal | Built for any builder/team — not a single creator’s personal workflow |
+| Multi-agent | Workers are a **pool**, not a single model |
+| Local-first | Studio is static; installs land on the user’s machine |
+| Engine-compatible | Uses Orca `orchestration` lifecycle (`task-create` → `dispatch --inject` → `worker_done`) |
+
+## User journeys
+
+### A) Web studio
+1. Open https://orca-lime.vercel.app  
+2. **Build mode** — name, coordinator, worker checkboxes, policies  
+3. **Install pack** — download / copy Quick Command into Orca  
+
+### B) Agent skill
 ```bash
 curl -fsSL https://orca-lime.vercel.app/setup-mode-pack.sh | bash
 ```
+Then in an agent: `/orchestration-mode`
 
-→ `~/.agents/skills/orca-mode-pack/` + `generate-pack.sh`  
-→ 에이전트: `/orchestration-mode`
-
-네 — **Vercel 사이트 + 같은 도메인의 setup-mode-pack.sh** 로 배포합니다.
-
-## 사용자 흐름 (사이트)
-
-1. https://orca-lime.vercel.app 접속  
-2. 탭 1–2: 개념  
-3. 탭 3: 팀장·실무 모델·(선택) 리뷰 워커  
-4. 탭 4: 설치 안내 · `.md` 다운로드 · AI 설치 요청문  
-5. `$HOME/.orca/<모드>/` 저장 + Orca Quick Command (Global)  
-6. (선택) `SKILL.md` → `~/.agents/skills/<모드>/`
-
-## 운영자: Vercel
-
-이미 연결됨 (`homepage`: orca-lime.vercel.app).
-
-- `main`에 푸시 → 자동 재배포  
-- 새 환경이면: Vercel Import → Framework **Other** · Build 없음 · Output 루트  
-
-공유 문구 예:
-
-```text
-Orca 조율 모드 만들기: https://orca-lime.vercel.app
-```
-
-## CLI 팩 생성 (선택)
-
+### C) CLI pack generator
 ```bash
 bash generate-pack.sh \
-  --name my-orch \
-  --display "MyOrch" \
+  --name my-mode \
+  --display "MyMode" \
   --coord grok \
-  --worker codex \
-  --worker-cmd 'codex -m gpt-5.6 -c model_reasoning_effort="xhigh"' \
-  --review-cmd 'claude --model sonnet' \
-  --max 3 \
-  --wt auto \
-  --coordination supervised \
-  --triggers 'my-orch, 조율'
+  --worker-entry 'role=implement|agent=codex|cmd=codex -m gpt-5.6 -c model_reasoning_effort="xhigh"' \
+  --worker-entry 'role=review|agent=claude|cmd=claude --model claude-sonnet-5' \
+  --worker-entry 'role=research|agent=grok|cmd=grok -m grok-4.5' \
+  --max 3
 ```
 
-## 템플릿·스킬
+## Repository layout
 
-| 경로 | 용도 |
-|------|------|
-| [`templates/REQUEST.template.md`](templates/REQUEST.template.md) | 채팅/에이전트에 붙이는 필요정보 표 |
-| [`templates/mode-pack.schema.json`](templates/mode-pack.schema.json) | JSON 스키마 |
-| [`skills/orca-mode-pack/`](skills/orca-mode-pack/) | `/orchestration-mode` 에이전트 스킬 |
-| [`generate-pack.sh`](generate-pack.sh) | CLI로 팩 생성 |
-| [`사용방법.md`](사용방법.md) | **배포·사용 전체 가이드 (한글)** |
+| Path | Purpose |
+|------|---------|
+| `index.html` | Product studio (Vercel) |
+| `setup-mode-pack.sh` | One-line skill installer |
+| `generate-pack.sh` | CLI pack generator |
+| `skills/orca-mode-pack/` | Agent skill sources |
+| `templates/` | REQUEST schema & human form |
+| `사용방법.md` | Extended Korean guide |
 
-## 엔진 스킬 (사용자 PC, 1회)
+## Deploy (operators)
+
+Static site on Vercel from `main`:
+
+- Framework: Other  
+- No build command  
+- Output: repository root  
+
+Push to `main` → production updates at the product URL.
+
+## Engine skills (end users, once)
 
 ```bash
 npx skills add https://github.com/stablyai/orca --skill orchestration
 npx skills add https://github.com/stablyai/orca --skill orca-cli
 ```
 
-## 로컬 미리보기
+## License
 
-```bash
-open index.html
-# 또는
-npx serve .
-```
-
-## 배움의 달인
-
-- [유튜브](https://www.youtube.com/@%EB%B0%B0%EC%9B%80%EC%9D%98%EB%8B%AC%EC%9D%B8-p5v)
-- [오픈채팅](https://open.kakao.com/o/gubGYQ7g)
-- [뉴스레터](https://newsletter.teaboard.link/)
-
-## 라이선스
-
-개인·교육 목적 사용 환영. Orca 상표·제품은 각 소유자 권리.
+Personal and educational use welcome. Orca trademarks belong to their respective owners; this project provides a compatible mode-design layer only.
