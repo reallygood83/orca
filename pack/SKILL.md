@@ -111,7 +111,7 @@ Or open studio: `open "$HOME/.orca/jinjing/studio/index.html"` (tab 3).
 
 ```text
 implement → codex -m gpt-5.6 …
-design    → gemini -m gemini-2.5-pro
+design    → gemini -m gemini-3.5-flash
 review    → claude --model sonnet
 research  → grok -m grok-4.5 …
 research  → hermes chat --tui

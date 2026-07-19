@@ -42,7 +42,7 @@ bash generate-pack.sh \
   --display "MyMode" \
   --coord grok \
   --worker-entry 'role=implement|agent=codex|cmd=codex -m gpt-5.6 -c model_reasoning_effort="xhigh"' \
-  --worker-entry 'role=design|agent=gemini|cmd=gemini -m gemini-2.5-pro' \
+  --worker-entry 'role=design|agent=gemini|cmd=gemini -m gemini-3.5-flash' \
   --worker-entry 'role=research|agent=hermes|cmd=hermes chat --tui' \
   --worker-entry 'role=review|agent=claude|cmd=claude --model claude-sonnet-5' \
   --worker-entry 'role=research|agent=grok|cmd=grok -m grok-4.5' \

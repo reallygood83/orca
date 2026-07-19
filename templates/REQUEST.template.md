@@ -52,7 +52,7 @@
 |------|-----|
 | role | `design` |
 | agent | `gemini` |
-| command | `gemini -m gemini-2.5-pro` |
+| command | `gemini -m gemini-3.5-flash` |
 | ownership | `edit` |
 
 ### Worker C — 예: Claude review

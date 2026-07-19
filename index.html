@@ -544,15 +544,16 @@
                 <option value="docs">docs · 문서</option>
               </select>
               <select class="w-preset" data-agent="gemini" style="flex:1;min-width:180px">
-                <option value="gemini-25-pro" data-cmd="gemini -m gemini-2.5-pro" selected>gemini-2.5-pro</option>
-                <option value="gemini-25-flash" data-cmd="gemini -m gemini-2.5-flash">gemini-2.5-flash</option>
-                <option value="gemini-20-flash" data-cmd="gemini -m gemini-2.0-flash">gemini-2.0-flash</option>
-                <option value="gemini-yolo-pro" data-cmd="gemini -m gemini-2.5-pro -y">gemini-2.5-pro · yolo</option>
+                <option value="gemini-35-flash" data-cmd="gemini -m gemini-3.5-flash" selected>gemini-3.5-flash (GA)</option>
+                <option value="gemini-31-pro" data-cmd="gemini -m gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
+                <option value="gemini-3-flash" data-cmd="gemini -m gemini-3-flash-preview">gemini-3-flash-preview</option>
+                <option value="gemini-31-flash-lite" data-cmd="gemini -m gemini-3.1-flash-lite-preview">gemini-3.1-flash-lite-preview</option>
+                <option value="gemini-yolo-35" data-cmd="gemini -m gemini-3.5-flash -y">gemini-3.5-flash · yolo</option>
                 <option value="gemini-default" data-cmd="gemini">CLI default</option>
                 <option value="custom" data-cmd="">Custom</option>
               </select>
             </div>
-            <input class="w-cmd" data-agent="gemini" type="text" value="gemini -m gemini-2.5-pro" />
+            <input class="w-cmd" data-agent="gemini" type="text" value="gemini -m gemini-3.5-flash" />
           </div>
 
           <div class="box" style="padding:12px 14px" data-agent="hermes">
