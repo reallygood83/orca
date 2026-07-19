@@ -50,10 +50,10 @@ JSON schema: [`references/mode-pack.schema.json`](references/mode-pack.schema.js
 | `modeName` | yes | `my-orch` (slug: `[a-z0-9-]+`) |
 | `displayName` | yes | `MyOrch` |
 | `coordination` | yes | `supervised` (default) \| `handoff` |
-| `coordinator.agent` | yes | `grok` \| `claude` \| `codex` |
-| `workers[]` | ≥1 (**여러 명 OK**) | Codex+Claude+Grok 동시 가능 |
+| `coordinator.agent` | yes | `grok` \| `claude` \| `codex` \| `gemini` \| `hermes` \| `opencode` |
+| `workers[]` | ≥1 (**여러 명 OK**) | Codex+Claude+Grok+Gemini+Hermes 동시 가능 |
 | `workers[].role` | yes | `implement` \| `review` \| `test` \| `research` |
-| `workers[].agent` | yes | `codex` \| `claude` \| `grok` \| … |
+| `workers[].agent` | yes | `codex` \| `claude` \| `grok` \| `gemini` \| `hermes` \| … |
 | `workers[].command` | yes | full CLI command with model/effort |
 | `worktreePolicy` | yes | `active` \| `isolated` \| `auto` |
 | `maxConcurrent` | no | default `3` |
@@ -110,10 +110,16 @@ Or open studio: `open "$HOME/.orca/jinjing/studio/index.html"` (tab 3).
 **Workers are a pool, not a single model.** Example:
 
 ```text
-implement → codex -m gpt-5.6 … 
+implement → codex -m gpt-5.6 …
+design    → gemini -m gemini-2.5-pro
 review    → claude --model sonnet
 research  → grok -m grok-4.5 …
+research  → hermes chat --tui
 ```
+
+**Hermes note:** spawn with `orca terminal create --command "hermes chat --tui"`.
+`tui-idle` may time out (Hermes is not always a first-class Orca TUI agent); still try
+`dispatch --inject` after a short wait — inject + `worker_done` works in smoke tests.
 
 - Create **separate terminals** per worker (different handles)
 - Different task specs with `[role/agent]` prefix

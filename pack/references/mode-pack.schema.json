@@ -25,7 +25,7 @@
       "type": "object",
       "required": ["agent"],
       "properties": {
-        "agent": { "type": "string", "enum": ["grok", "claude", "codex", "opencode", "custom"] },
+        "agent": { "type": "string", "enum": ["grok", "claude", "codex", "gemini", "hermes", "opencode", "custom"] },
         "command": { "type": "string", "description": "Optional; empty = current session" }
       }
     },

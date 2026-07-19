@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Orca Mode Studio — design multi-agent orchestration modes (coordinator + Codex/Claude/Grok workers), export playbooks, install in one command." />
+  <meta name="description" content="Orca Mode Studio — design multi-agent orchestration modes (coordinator + Codex/Claude/Grok/Gemini/Hermes workers), export playbooks, install in one command." />
   <meta name="theme-color" content="#0b0d12" />
   <title>Orca Mode Studio · Multi-agent orchestration modes</title>
   <style>
@@ -275,7 +275,7 @@
       <p class="hero-lead">
         <strong>Orca Mode Studio</strong>는 누구나 자신의 multi-agent 워크플로를 정의하고,
         플레이북·Quick Command·에이전트 스킬로 내보낼 수 있는 <strong>범용 설계 도구</strong>입니다.
-        팀장(coordinator) + 실무 풀(Codex / Claude / Grok 등)을 조합하세요.
+        팀장(coordinator) + 실무 풀(Codex / Claude / Grok / Gemini / Hermes 등)을 조합하세요.
         설정은 서버에 저장되지 않으며, <strong>사용자 기기 로컬</strong>에 설치됩니다.
       </p>
       <div class="hero-cta">
@@ -287,7 +287,7 @@
 
     <div class="metrics" aria-label="Product highlights">
       <div class="metric"><b>Coordinator + Workers</b><span>역할 분리된 multi-agent 루프</span></div>
-      <div class="metric"><b>Multi-model pool</b><span>Codex · Claude · Grok 동시 구성</span></div>
+      <div class="metric"><b>Multi-model pool</b><span>Codex · Claude · Grok · Gemini · Hermes 동시 구성</span></div>
       <div class="metric"><b>Local-first</b><span>모드 설정은 사용자 PC에만 저장</span></div>
       <div class="metric"><b>Export ready</b><span>Playbook · Quick Command · Skill</span></div>
     </div>
@@ -401,7 +401,7 @@
 
         <div class="callout" style="margin-bottom:14px">
           <strong>Worker는 여러 명 가능합니다.</strong>
-          Codex + Claude + Grok을 동시에 구성하세요. 각 agent는 별도 터미널로 실행됩니다.
+          Codex + Claude + Grok + Gemini + Hermes를 동시에 구성하세요. 각 agent는 별도 터미널로 실행됩니다.
         </div>
 
         <div class="row">
@@ -431,6 +431,8 @@
               <option value="grok" selected>Grok — plan & synthesize</option>
               <option value="claude">Claude</option>
               <option value="codex">Codex</option>
+              <option value="gemini">Gemini — multimodal & long context</option>
+              <option value="hermes">Hermes — persistent agent</option>
               <option value="opencode">OpenCode</option>
             </select>
           </label>
@@ -524,6 +526,59 @@
               </select>
             </div>
             <input class="w-cmd" data-agent="grok" type="text" value="grok -m grok-4.5 --reasoning-effort xhigh" />
+          </div>
+
+          <div class="box" style="padding:12px 14px" data-agent="gemini">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
+                <input type="checkbox" class="w-enable" data-agent="gemini" /> Gemini
+              </label>
+              <select class="w-role" data-agent="gemini" style="width:auto;min-width:160px">
+                <option value="implement">implement · 코딩</option>
+                <option value="design" selected>design · UI/UX</option>
+                <option value="backend-design">backend-design · API/스키마</option>
+                <option value="fullstack">fullstack · E2E</option>
+                <option value="review">review · 리뷰만</option>
+                <option value="research">research · 조사</option>
+                <option value="test">test · 테스트</option>
+                <option value="docs">docs · 문서</option>
+              </select>
+              <select class="w-preset" data-agent="gemini" style="flex:1;min-width:180px">
+                <option value="gemini-25-pro" data-cmd="gemini -m gemini-2.5-pro" selected>gemini-2.5-pro</option>
+                <option value="gemini-25-flash" data-cmd="gemini -m gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-20-flash" data-cmd="gemini -m gemini-2.0-flash">gemini-2.0-flash</option>
+                <option value="gemini-yolo-pro" data-cmd="gemini -m gemini-2.5-pro -y">gemini-2.5-pro · yolo</option>
+                <option value="gemini-default" data-cmd="gemini">CLI default</option>
+                <option value="custom" data-cmd="">Custom</option>
+              </select>
+            </div>
+            <input class="w-cmd" data-agent="gemini" type="text" value="gemini -m gemini-2.5-pro" />
+          </div>
+
+          <div class="box" style="padding:12px 14px" data-agent="hermes">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);cursor:pointer">
+                <input type="checkbox" class="w-enable" data-agent="hermes" /> Hermes
+              </label>
+              <select class="w-role" data-agent="hermes" style="width:auto;min-width:160px">
+                <option value="implement">implement · 코딩</option>
+                <option value="design">design · UI/UX</option>
+                <option value="backend-design">backend-design · API/스키마</option>
+                <option value="fullstack">fullstack · E2E</option>
+                <option value="review">review · 리뷰만</option>
+                <option value="research" selected>research · 조사</option>
+                <option value="test">test · 테스트</option>
+                <option value="docs">docs · 문서</option>
+              </select>
+              <select class="w-preset" data-agent="hermes" style="flex:1;min-width:180px">
+                <option value="hermes-chat-tui" data-cmd="hermes chat --tui" selected>chat · tui</option>
+                <option value="hermes-chat-yolo" data-cmd="hermes chat --tui --yolo">chat · tui · yolo</option>
+                <option value="hermes-chat-cli" data-cmd="hermes chat --cli">chat · cli</option>
+                <option value="hermes-default" data-cmd="hermes">CLI default</option>
+                <option value="custom" data-cmd="">Custom</option>
+              </select>
+            </div>
+            <input class="w-cmd" data-agent="hermes" type="text" value="hermes chat --tui" />
           </div>
         </div>
 
@@ -663,7 +718,7 @@ npx skills add https://github.com/stablyai/orca --skill orca-cli</pre>
         <pre class="box" id="skillShareBlurb">Orca Mode Studio
 https://orca.teaboard.link
 
-Create multi-agent modes (Codex + Claude + Grok).
+Create multi-agent modes (Codex + Claude + Grok + Gemini + Hermes).
 Optional skill install:
 curl -fsSL https://orca.teaboard.link/setup-mode-pack.sh | bash
 
@@ -696,7 +751,7 @@ Then: /orchestration-mode</pre>
 
   <script>
 const $ = (id) => document.getElementById(id);
-    const labels = { grok: "Grok", claude: "Claude", codex: "Codex", opencode: "OpenCode", custom: "Custom" };
+    const labels = { grok: "Grok", claude: "Claude", codex: "Codex", gemini: "Gemini", hermes: "Hermes", opencode: "OpenCode", custom: "Custom" };
     const wtLabels = {
       active: "지금 폴더에서 (같은 브랜치)",
       isolated: "새 worktree에서 독립 작업",
@@ -761,7 +816,7 @@ const $ = (id) => document.getElementById(id);
     }
 
     function collectWorkers() {
-      const agents = ["codex", "claude", "grok"];
+      const agents = ["codex", "claude", "grok", "gemini", "hermes"];
       const out = [];
       agents.forEach((agent) => {
         const en = document.querySelector(`.w-enable[data-agent="${agent}"]`);

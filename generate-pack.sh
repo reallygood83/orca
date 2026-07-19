@@ -70,6 +70,8 @@ label_of() {
     grok) echo Grok ;;
     claude) echo Claude ;;
     codex) echo Codex ;;
+    gemini) echo Gemini ;;
+    hermes) echo Hermes ;;
     opencode) echo OpenCode ;;
     *) echo "$1" ;;
   esac
@@ -212,7 +214,7 @@ if project_rules:
 playbook = f"""# {display} Orchestration Mode (Orca) — Global
 
 {coord_l} is the **coordinator**. Worker pool: **{worker_l}**.
-You may run **multiple worker agents at once** (Codex + Claude + Grok, etc.).
+You may run **multiple worker agents at once** (Codex + Claude + Grok + Gemini + Hermes, etc.).
 Everything reports back to the coordinator for the **final synthesis**.
 
 {handoff_note}

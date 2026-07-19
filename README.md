@@ -6,7 +6,7 @@ A **local-first, multi-agent orchestration mode designer** for [Orca](https://or
 
 Anyone can:
 
-1. Define a **coordinator** + **worker pool** (Codex, Claude, Grok, … — multiple at once)
+1. Define a **coordinator** + **worker pool** (Codex, Claude, Grok, Gemini, Hermes, … — multiple at once)
 2. Export a **Playbook** + **Quick Command**
 3. Optionally install the **agent skill** (`orca-mode-pack`) in one command
 4. Run supervised orchestration on their own machine
@@ -42,6 +42,8 @@ bash generate-pack.sh \
   --display "MyMode" \
   --coord grok \
   --worker-entry 'role=implement|agent=codex|cmd=codex -m gpt-5.6 -c model_reasoning_effort="xhigh"' \
+  --worker-entry 'role=design|agent=gemini|cmd=gemini -m gemini-2.5-pro' \
+  --worker-entry 'role=research|agent=hermes|cmd=hermes chat --tui' \
   --worker-entry 'role=review|agent=claude|cmd=claude --model claude-sonnet-5' \
   --worker-entry 'role=research|agent=grok|cmd=grok -m grok-4.5' \
   --max 3

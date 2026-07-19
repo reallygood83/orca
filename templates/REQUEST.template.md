@@ -33,7 +33,7 @@
 
 ## 3. 실무 워커 (Workers) — **여러 명 가능**
 
-> **한 명일 필요 없음.** Codex + Claude + Grok 을 동시에 팀으로 둘 수 있습니다.  
+> **한 명일 필요 없음.** Codex + Claude + Grok + Gemini + Hermes 를 동시에 팀으로 둘 수 있습니다.  
 > **dispatch 에는 모델 옵션이 없습니다.** 각 워커의 `command` 에 모델·effort 를 넣습니다.  
 > 실행 시 **에이전트마다 별도 터미널** + 각각 `dispatch --inject`.
 
@@ -46,7 +46,16 @@
 | command | `codex -m gpt-5.6 -c model_reasoning_effort="xhigh"` |
 | ownership | `edit` |
 
-### Worker B — 예: Claude review
+### Worker B — 예: Gemini design
+
+| 필드 | 값 |
+|------|-----|
+| role | `design` |
+| agent | `gemini` |
+| command | `gemini -m gemini-2.5-pro` |
+| ownership | `edit` |
+
+### Worker C — 예: Claude review
 
 | 필드 | 값 |
 |------|-----|
@@ -55,7 +64,7 @@
 | command | `claude --model sonnet` |
 | ownership | `review-only` |
 
-### Worker C — 예: Grok research / implement
+### Worker D — 예: Grok research / implement
 
 | 필드 | 값 |
 |------|-----|
@@ -64,7 +73,18 @@
 | command | `grok -m grok-4.5 --reasoning-effort xhigh` |
 | ownership | `edit` |
 
-원하는 만큼 Worker D, E… 추가 가능. 최소 1명.
+### Worker E — 예: Hermes research (persistent agent)
+
+| 필드 | 값 |
+|------|-----|
+| role | `research` |
+| agent | `hermes` |
+| command | `hermes chat --tui` |
+| ownership | `edit` |
+
+> Hermes: `tui-idle` 이 타임아웃 날 수 있음. 짧은 대기 후 `dispatch --inject` 시도. inject + `worker_done` 경로 검증됨.
+
+원하는 만큼 Worker F… 추가 가능. 최소 1명.
 
 ---
 
